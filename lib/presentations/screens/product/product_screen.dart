@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../cores/routes/app_router.dart';
 import '../../widgets/custom_text_field.dart';
 import 'widgets/product_card.dart';
 
@@ -117,9 +119,10 @@ class _ProductScreenState extends State<ProductScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              // TODO: Implement add product functionality
+              context.pushNamed(RouteConstants.addProduct);
             },
             icon: const Icon(Icons.add),
+            tooltip: 'Tambah Produk',
           ),
         ],
       ),
