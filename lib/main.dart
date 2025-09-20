@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+
+import 'presentations/providers/cart_provider.dart';
 
 import 'cores/routes/app_router.dart';
 
@@ -16,14 +19,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Kasirin App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => CartProvider())],
+      child: MaterialApp.router(
+        title: 'Kasirin App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        routerDelegate: _appRouter.router.routerDelegate,
+        routeInformationParser: _appRouter.router.routeInformationParser,
+        routeInformationProvider: _appRouter.router.routeInformationProvider,
       ),
-      routerDelegate: _appRouter.router.routerDelegate,
-      routeInformationParser: _appRouter.router.routeInformationParser,
-      routeInformationProvider: _appRouter.router.routeInformationProvider,
     );
   }
 }

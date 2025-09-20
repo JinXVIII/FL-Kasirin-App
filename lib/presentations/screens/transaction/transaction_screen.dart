@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/cart_provider.dart';
+
+import '../../../cores/routes/app_router.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
@@ -14,7 +20,6 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _filteredProducts = [];
-  final List<Map<String, dynamic>> _cartItems = [];
   String _searchQuery = '';
 
   // Sample product data
@@ -92,118 +97,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
     });
   }
 
-  int _getProductQuantity(int productId) {
-    for (var item in _cartItems) {
-      if (item['product']['id'] == productId) {
-        return item['quantity'];
-      }
-    }
-    return 0;
-  }
-
-  void _addToCart(Map<String, dynamic> product) {
-    setState(() {
-      final existingItemIndex = _cartItems.indexWhere(
-        (item) => item['product']['id'] == product['id'],
-      );
-
-      if (existingItemIndex != -1) {
-        // Item already in cart, increase quantity
-        _cartItems[existingItemIndex]['quantity'] += 1;
-      } else {
-        // Add new item to cart
-        _cartItems.add({'product': product, 'quantity': 1});
-      }
-    });
-  }
-
-  void _increaseQuantity(int productId) {
-    setState(() {
-      final existingItemIndex = _cartItems.indexWhere(
-        (item) => item['product']['id'] == productId,
-      );
-
-      if (existingItemIndex != -1) {
-        _cartItems[existingItemIndex]['quantity'] += 1;
-      } else {
-        // If item doesn't exist in cart, add it
-        final product = _products.firstWhere((p) => p['id'] == productId);
-        _cartItems.add({'product': product, 'quantity': 1});
-      }
-    });
-  }
-
-  void _decreaseQuantity(int productId) {
-    setState(() {
-      final existingItemIndex = _cartItems.indexWhere(
-        (item) => item['product']['id'] == productId,
-      );
-
-      if (existingItemIndex != -1) {
-        if (_cartItems[existingItemIndex]['quantity'] > 1) {
-          _cartItems[existingItemIndex]['quantity'] -= 1;
-        } else {
-          // Remove item if quantity would be 0
-          _cartItems.removeAt(existingItemIndex);
-        }
-      }
-    });
-  }
-
-  int _getTotalPrice() {
-    return _cartItems.fold(0, (total, item) {
-      return total + (item['product']['price'] * item['quantity'] as int);
-    });
-  }
-
-  int _getTotalItems() {
-    return _cartItems.fold(0, (total, item) {
-      return total + (item['quantity'] as int);
-    });
-  }
-
-  void _processPayment() {
-    if (_cartItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Keranjang belanja masih kosong'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // TODO: Implement payment processing
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Pembayaran'),
-        content: Text('Total: Rp ${_getTotalPrice().toString()}'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _cartItems.clear();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pembayaran berhasil'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text('Bayar'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,17 +106,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _searchController.clear();
-                _filteredProducts = List.from(_products);
-              });
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -256,78 +138,101 @@ class _TransactionScreenState extends State<TransactionScreen> {
           // Products grid
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: _filteredProducts.isEmpty
-                  ? const Center(child: Text('Tidak ada produk ditemukan'))
-                  : GridView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.75,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemCount: _filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = _filteredProducts[index];
-                        return ProductCard(
-                          product: product,
-                          quantity: _getProductQuantity(product['id']),
-                          onAddToCart: () => _addToCart(product),
-                          onIncreaseQuantity: () =>
-                              _increaseQuantity(product['id']),
-                          onDecreaseQuantity: () =>
-                              _decreaseQuantity(product['id']),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Consumer<CartProvider>(
+                builder: (context, cartProvider, child) {
+                  return _filteredProducts.isEmpty
+                      ? const Center(child: Text('Tidak ada produk ditemukan'))
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.75,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          itemCount: _filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = _filteredProducts[index];
+                            return ProductCard(
+                              product: product,
+                              quantity: cartProvider.getProductQuantity(
+                                product['id'],
+                              ),
+                              onAddToCart: () {
+                                cartProvider.addToCart(product);
+                              },
+                              onIncreaseQuantity: () {
+                                cartProvider.increaseQuantity(product['id']);
+                              },
+                              onDecreaseQuantity: () {
+                                cartProvider.decreaseQuantity(product['id']);
+                              },
+                            );
+                          },
                         );
-                      },
-                    ),
+                },
+              ),
             ),
           ),
 
           // Cart section
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(25),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
+          Consumer<CartProvider>(
+            builder: (context, cartProvider, child) {
+              return Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Total price
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Harga', style: TextStyle(fontSize: 16)),
-                    Text(
-                      'Rp ${_getTotalPrice().toString()}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    // Total price
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Harga',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Rp ${cartProvider.totalPrice.toString()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Checkout button
+                    CustomButton.filled(
+                      onPressed: () {
+                        if (cartProvider.cartItems.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Keranjang belanja masih kosong'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+                        context.pushNamed(RouteConstants.checkout);
+                      },
+                      label: "Checkout (${cartProvider.totalItems} items)",
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 16),
-
-                // Pay button
-                CustomButton.filled(
-                  onPressed: _processPayment,
-                  label: "Bayar (${_getTotalItems()})",
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
