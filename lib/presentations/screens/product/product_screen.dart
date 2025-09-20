@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../cores/routes/app_router.dart';
+
 import '../../widgets/custom_text_field.dart';
 import 'widgets/product_card.dart';
 
@@ -181,7 +182,10 @@ class _ProductScreenState extends State<ProductScreen> {
                         return ProductCard(
                           product: product,
                           onEdit: () {
-                            // TODO: Implement edit product functionality
+                            context.pushNamed(
+                              RouteConstants.editProduct,
+                              pathParameters: {'id': product['id'].toString()},
+                            );
                           },
                           onDelete: () {
                             // TODO: Implement delete product functionality

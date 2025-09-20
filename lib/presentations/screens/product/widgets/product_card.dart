@@ -1,5 +1,6 @@
-import 'package:fe_kasirin_app/cores/constants/colors.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../cores/constants/colors.dart';
 
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;

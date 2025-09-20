@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../presentations/screens/dashboard/dashboard_screen.dart';
 import '../../presentations/screens/product/product_screen.dart';
 import '../../presentations/screens/product/add_product_screen.dart';
+import '../../presentations/screens/product/edit_product_screen.dart';
 
 class RouteConstants {
   static const String dashboard = 'dashboard';
@@ -12,7 +13,10 @@ class RouteConstants {
   static const String productPath = '/products';
 
   static const String addProduct = 'add-product';
-  static const String addProductPath = '/products/add';
+  static const String addProductPath = 'add';
+
+  static const String editProduct = 'edit-product';
+  static const String editProductPath = 'edit/:id';
 }
 
 class AppRouter {
@@ -33,6 +37,14 @@ class AppRouter {
             name: RouteConstants.addProduct,
             path: RouteConstants.addProductPath,
             builder: (context, state) => const AddProductScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.editProduct,
+            path: RouteConstants.editProductPath,
+            builder: (context, state) {
+              final productId = state.pathParameters['id']!;
+              return EditProductScreen(productId: productId);
+            },
           ),
         ],
       ),
