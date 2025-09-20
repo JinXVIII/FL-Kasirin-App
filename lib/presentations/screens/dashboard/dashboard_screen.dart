@@ -1,8 +1,10 @@
+import 'package:fe_kasirin_app/cores/routes/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'widget/financial_information_card.dart';
-import 'widget/menu_item_card.dart';
-import 'widget/sales_line_chart.dart';
+import 'widgets/financial_information_card.dart';
+import 'widgets/menu_item_card.dart';
+import 'widgets/sales_line_chart.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,7 +13,13 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> menus = [
       {"icon": Icons.shopping_cart_outlined, "label": "Kasir", "onTap": () {}},
-      {"icon": Icons.inventory_2_outlined, "label": "Produk", "onTap": () {}},
+      {
+        "icon": Icons.inventory_2_outlined,
+        "label": "Produk",
+        "onTap": () {
+          context.pushNamed(RouteConstants.product);
+        },
+      },
       {
         "icon": Icons.receipt_long_outlined,
         "label": "Riwayat Penjualan",
@@ -53,45 +61,47 @@ class DashboardScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // financial information card
-            FinancialInformationCard(),
-            const SizedBox(height: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // financial information card
+              FinancialInformationCard(),
+              const SizedBox(height: 20),
 
-            // Menu app
-            LayoutBuilder(
-              builder: (context, constraint) {
-                var spacing = 16.0;
-                var rowCount = 4;
+              // Menu app
+              LayoutBuilder(
+                builder: (context, constraint) {
+                  var spacing = 16.0;
+                  var rowCount = 4;
 
-                return Wrap(
-                  runSpacing: spacing,
-                  spacing: spacing,
-                  children: List.generate(menus.length, (index) {
-                    var item = menus[index];
-                    var isProFeature = item["isPro"] ?? false;
+                  return Wrap(
+                    runSpacing: spacing,
+                    spacing: spacing,
+                    children: List.generate(menus.length, (index) {
+                      var item = menus[index];
+                      var isProFeature = item["isPro"] ?? false;
 
-                    var size =
-                        (constraint.biggest.width -
-                            ((rowCount + 1) * spacing)) /
-                        rowCount;
+                      var size =
+                          (constraint.biggest.width -
+                              ((rowCount + 1) * spacing)) /
+                          rowCount;
 
-                    return MenuItemCard(
-                      item: item,
-                      size: size,
-                      isProFeature: isProFeature,
-                    );
-                  }),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+                      return MenuItemCard(
+                        item: item,
+                        size: size,
+                        isProFeature: isProFeature,
+                      );
+                    }),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
 
-            // Chart sales
-            SalesLineChart(),
-          ],
+              // Chart sales
+              SalesLineChart(),
+            ],
+          ),
         ),
       ),
     );
