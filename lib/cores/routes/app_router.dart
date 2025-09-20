@@ -4,6 +4,7 @@ import '../../presentations/screens/dashboard/dashboard_screen.dart';
 import '../../presentations/screens/product/product_screen.dart';
 import '../../presentations/screens/product/add_product_screen.dart';
 import '../../presentations/screens/product/edit_product_screen.dart';
+import '../../presentations/screens/transaction/transaction_screen.dart';
 
 class RouteConstants {
   static const String dashboard = 'dashboard';
@@ -17,6 +18,9 @@ class RouteConstants {
 
   static const String editProduct = 'edit-product';
   static const String editProductPath = 'edit/:id';
+
+  static const String transaction = 'transaction';
+  static const String transactionPath = '/transaction';
 }
 
 class AppRouter {
@@ -47,6 +51,11 @@ class AppRouter {
             },
           ),
         ],
+      ),
+      GoRoute(
+        name: RouteConstants.transaction,
+        path: RouteConstants.transactionPath,
+        builder: (context, state) => const TransactionScreen(),
       ),
     ],
   );

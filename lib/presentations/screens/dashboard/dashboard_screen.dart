@@ -12,7 +12,13 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> menus = [
-      {"icon": Icons.shopping_cart_outlined, "label": "Kasir", "onTap": () {}},
+      {
+        "icon": Icons.shopping_cart_outlined,
+        "label": "Kasir",
+        "onTap": () {
+          context.pushNamed(RouteConstants.transaction);
+        },
+      },
       {
         "icon": Icons.inventory_2_outlined,
         "label": "Produk",
