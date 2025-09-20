@@ -3,11 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../cores/routes/app_router.dart';
-
 import '../../providers/cart_provider.dart';
-
 import '../../widgets/custom_button.dart';
 import 'widgets/checkout_item_card.dart';
+import 'widgets/payment_alert_dialog.dart';
 
 class CheckoutScreen extends StatelessWidget {
   const CheckoutScreen({super.key});
@@ -103,28 +102,6 @@ class CheckoutScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Total items
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total Pesanan',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          '${cartProvider.totalItems} item',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
                     // Total price
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,7 +127,7 @@ class CheckoutScreen extends StatelessWidget {
                     // Pay button
                     CustomButton.filled(
                       onPressed: () {
-                        _processPayment(context, cartProvider);
+                        _showPaymentDialog(context, cartProvider);
                       },
                       label: "Bayar",
                     ),
@@ -164,32 +141,21 @@ class CheckoutScreen extends StatelessWidget {
     );
   }
 
-  void _processPayment(BuildContext context, CartProvider cartProvider) {
+  void _showPaymentDialog(BuildContext context, CartProvider cartProvider) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Pembayaran'),
-        content: Text('Total: Rp ${cartProvider.totalPrice.toString()}'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              cartProvider.clearCart();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pembayaran berhasil'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              context.go(RouteConstants.transactionPath);
-            },
-            child: const Text('Bayar'),
-          ),
-        ],
+      builder: (context) => PaymentAlertDialog(
+        totalPrice: cartProvider.totalPrice,
+        onPaymentSuccess: () {
+          cartProvider.clearCart();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pembayaran berhasil'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.pop();
+        },
       ),
     );
   }
