@@ -4,6 +4,14 @@ class AppTextStyles {
   // Base font family
   static const String fontFamily = 'Poppins';
 
+  // TitlePage styles
+  static const TextStyle titlePage = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    color: Colors.black,
+  );
+
   // Heading styles
   static const TextStyle heading1 = TextStyle(
     fontFamily: fontFamily,
