@@ -7,6 +7,7 @@ import '../../presentations/screens/product/edit_product_screen.dart';
 import '../../presentations/screens/transaction/transaction_screen.dart';
 import '../../presentations/screens/transaction/checkout_screen.dart';
 import '../../presentations/screens/sales_history/sales_history_screen.dart';
+import '../../presentations/screens/sales_history/sales_history_detail_screen.dart';
 
 class RouteConstants {
   static const String dashboard = 'dashboard';
@@ -29,6 +30,9 @@ class RouteConstants {
 
   static const String salesHistory = 'sales-history';
   static const String salesHistoryPath = '/sales-history';
+
+  static const String salesHistoryDetail = 'sales-history-detail';
+  static const String salesHistoryDetailPath = '/sales-history/:id';
 }
 
 class AppRouter {
@@ -74,6 +78,26 @@ class AppRouter {
         name: RouteConstants.salesHistory,
         path: RouteConstants.salesHistoryPath,
         builder: (context, state) => const SalesHistoryScreen(),
+      ),
+      GoRoute(
+        name: RouteConstants.salesHistoryDetail,
+        path: RouteConstants.salesHistoryDetailPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return SalesHistoryDetailScreen(
+            salesData: {
+              'id': int.parse(id),
+              'transactionNumber': 'TRX-20230921-001',
+              'transactionDate': DateTime.now(),
+              'totalAmount': 42000,
+              'paymentMethod': 'E-Wallet',
+              'items': [
+                {'productName': 'Nasi Goreng', 'quantity': 1, 'price': 25000},
+                {'productName': 'Kopi Hitam', 'quantity': 1, 'price': 15000},
+              ],
+            },
+          );
+        },
       ),
     ],
   );
