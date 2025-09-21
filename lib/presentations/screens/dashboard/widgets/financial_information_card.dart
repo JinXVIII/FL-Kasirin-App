@@ -1,6 +1,7 @@
+import 'package:fe_kasirin_app/cores/constants/colors.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
 
 class FinancialInformationCard extends StatelessWidget {
   const FinancialInformationCard({super.key});
@@ -10,23 +11,22 @@ class FinancialInformationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.orange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Warung Madura United",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
+          Text("Warung Madura United", style: AppTextStyles.whiteHeading3),
           const SizedBox(height: 4),
+
           Divider(thickness: 0.5, color: Colors.white),
           const SizedBox(height: 4),
+
           SizedBox(
             child: Row(
               children: [
@@ -36,35 +36,22 @@ class FinancialInformationCard extends StatelessWidget {
                     children: [
                       Text(
                         "Omzet Hari Ini",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                        style: AppTextStyles.whiteBodySmall,
                       ),
-                      Text(
-                        "Rp 100.000",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text("Rp 100.000", style: AppTextStyles.whiteHeading4),
                     ],
                   ),
                 ),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Omzet Bulan Ini",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                        style: AppTextStyles.whiteBodySmall,
                       ),
-                      Text(
-                        "Rp 1.000.000",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text("Rp 1.000.000", style: AppTextStyles.whiteHeading4),
                     ],
                   ),
                 ),
@@ -81,35 +68,22 @@ class FinancialInformationCard extends StatelessWidget {
                     children: [
                       Text(
                         "Menu Terjual Hari Ini",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                        style: AppTextStyles.whiteBodySmall,
                       ),
-                      Text(
-                        "10",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text("10", style: AppTextStyles.whiteHeading4),
                     ],
                   ),
                 ),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Menu Terjual Bulan Ini",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                        style: AppTextStyles.whiteBodySmall,
                       ),
-                      Text(
-                        "100",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text("100", style: AppTextStyles.whiteHeading4),
                     ],
                   ),
                 ),

@@ -1,6 +1,9 @@
-import 'package:fe_kasirin_app/cores/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../cores/routes/app_router.dart';
+import '../../../cores/constants/colors.dart';
+import '../../../cores/themes/text_styles.dart';
 
 import 'widgets/financial_information_card.dart';
 import 'widgets/menu_item_card.dart';
@@ -28,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
       },
       {
         "icon": Icons.receipt_long_outlined,
-        "label": "Riwayat Penjualan",
+        "label": "Riwayat",
         "onTap": () {
           context.pushNamed(RouteConstants.salesHistory);
         },
@@ -52,22 +55,30 @@ class DashboardScreen extends StatelessWidget {
         "isPro": true,
         "onTap": () {},
       },
-      {
-        "icon": Icons.play_circle_outline,
-        "label": "Video Tutorial",
-        "onTap": () {},
-      },
-      {"icon": Icons.help_outline, "label": "Pusat Bantuan", "onTap": () {}},
+      {"icon": Icons.play_circle_outline, "label": "Tutorial", "onTap": () {}},
+      {"icon": Icons.help_outline, "label": "Bantuan", "onTap": () {}},
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Dashboard",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: Text("Dashboard", style: AppTextStyles.titlePage),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: AppColors.orange),
+          onPressed: () {},
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.notifications_none,
+              color: AppColors.orange,
+              // size: 24,
+            ),
+            onPressed: () {},
+          ),
+        ],
       ),
+      backgroundColor: AppColors.body,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SingleChildScrollView(
@@ -75,12 +86,12 @@ class DashboardScreen extends StatelessWidget {
             children: [
               // financial information card
               FinancialInformationCard(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // Menu app
               LayoutBuilder(
                 builder: (context, constraint) {
-                  var spacing = 16.0;
+                  var spacing = 8.0;
                   var rowCount = 4;
 
                   return Wrap(
@@ -104,7 +115,7 @@ class DashboardScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // Chart sales
               SalesLineChart(),

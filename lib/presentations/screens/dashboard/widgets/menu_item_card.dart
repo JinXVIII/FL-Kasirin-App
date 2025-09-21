@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
+
 class MenuItemCard extends StatelessWidget {
   const MenuItemCard({
     super.key,
@@ -16,16 +19,16 @@ class MenuItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => item["onTap"](),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withAlpha(30),
+              color: Colors.grey.withAlpha(40),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, 3),
@@ -40,24 +43,21 @@ class MenuItemCard extends StatelessWidget {
                 children: [
                   Icon(
                     item["icon"] as IconData,
-                    size: size * 0.4, // Ukuran ikon 40% dari ukuran kotak
-                    color: Colors.blueGrey[700],
+                    size: size * 0.3,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 8),
+
                   Text(
                     item["label"] as String,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize:
-                          size * 0.12, // Ukuran teks 12% dari ukuran kotak
-                      color: Colors.blueGrey[800],
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.labelSmall,
                   ),
                 ],
               ),
             ),
-            // Tambahkan label "PRO" di pojok kanan atas jika isPro true
+
+            // Fitur PRO
             if (isProFeature)
               Positioned(
                 top: 4,
@@ -68,15 +68,13 @@ class MenuItemCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: AppColors.orange,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     "PRO",
-                    style: TextStyle(
+                    style: AppTextStyles.labelSmall.copyWith(
                       color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

@@ -2,6 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
+
 class SalesLineChart extends StatelessWidget {
   const SalesLineChart({super.key});
 
@@ -10,28 +13,23 @@ class SalesLineChart extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1.5,
       child: Card(
-        elevation: 4,
+        elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: const Color(0xff232d37),
+        color: AppColors.card,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Penjualan Mingguan',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const Text('Penjualan Mingguan', style: AppTextStyles.heading4),
               const SizedBox(height: 4),
+
               const Text(
                 'Total pendapatan 7 hari terakhir',
-                style: TextStyle(color: Color(0xff828996), fontSize: 12),
+                style: AppTextStyles.bodySmall,
               ),
               const SizedBox(height: 12),
+
               Expanded(child: LineChart(mainData())),
             ],
           ),
@@ -42,9 +40,9 @@ class SalesLineChart extends StatelessWidget {
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(
-      color: Color(0xff828996),
       fontWeight: FontWeight.bold,
       fontSize: 12,
+      fontFamily: 'Poppins',
     );
     String text;
     final day = DateTime.now().subtract(Duration(days: 6 - value.toInt()));
@@ -59,9 +57,9 @@ class SalesLineChart extends StatelessWidget {
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(
-      color: Color(0xff828996),
-      fontWeight: FontWeight.bold,
-      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      fontSize: 10,
+      fontFamily: 'Poppins',
     );
     String text;
     if (value == 0) {
@@ -139,8 +137,8 @@ class SalesLineChart extends StatelessWidget {
         LineChartBarData(
           spots: spots,
           isCurved: true,
-          gradient: const LinearGradient(
-            colors: [Color(0xff23b6e6), Color(0xff02d39a)],
+          gradient: LinearGradient(
+            colors: [AppColors.primary, AppColors.orange],
           ),
           barWidth: 5,
           isStrokeCapRound: true,
@@ -149,8 +147,8 @@ class SalesLineChart extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                const Color(0xff23b6e6).withAlpha(30),
-                const Color(0xff02d39a).withAlpha(30),
+                AppColors.primary.withAlpha(30),
+                AppColors.orange.withAlpha(30),
               ],
             ),
           ),
