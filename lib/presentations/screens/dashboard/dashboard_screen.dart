@@ -29,7 +29,9 @@ class DashboardScreen extends StatelessWidget {
       {
         "icon": Icons.receipt_long_outlined,
         "label": "Riwayat Penjualan",
-        "onTap": () {},
+        "onTap": () {
+          context.pushNamed(RouteConstants.salesHistory);
+        },
       },
       {"icon": Icons.bar_chart_outlined, "label": "Laporan", "onTap": () {}},
       {

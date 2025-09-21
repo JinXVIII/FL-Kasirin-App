@@ -6,6 +6,7 @@ import '../../presentations/screens/product/add_product_screen.dart';
 import '../../presentations/screens/product/edit_product_screen.dart';
 import '../../presentations/screens/transaction/transaction_screen.dart';
 import '../../presentations/screens/transaction/checkout_screen.dart';
+import '../../presentations/screens/sales_history/sales_history_screen.dart';
 
 class RouteConstants {
   static const String dashboard = 'dashboard';
@@ -25,6 +26,9 @@ class RouteConstants {
 
   static const String checkout = 'checkout';
   static const String checkoutPath = '/checkout';
+
+  static const String salesHistory = 'sales-history';
+  static const String salesHistoryPath = '/sales-history';
 }
 
 class AppRouter {
@@ -65,6 +69,11 @@ class AppRouter {
         name: RouteConstants.checkout,
         path: RouteConstants.checkoutPath,
         builder: (context, state) => const CheckoutScreen(),
+      ),
+      GoRoute(
+        name: RouteConstants.salesHistory,
+        path: RouteConstants.salesHistoryPath,
+        builder: (context, state) => const SalesHistoryScreen(),
       ),
     ],
   );
