@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../cores/constants/colors.dart';
 import '../../../cores/routes/app_router.dart';
+import '../../../cores/themes/text_styles.dart';
 
 import '../../widgets/custom_text_field.dart';
 import 'widgets/product_card.dart';
@@ -112,10 +114,7 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Daftar Produk",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Daftar Produk", style: AppTextStyles.titlePage),
         centerTitle: true,
         actions: [
           IconButton(
@@ -127,6 +126,7 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
         ],
       ),
+      backgroundColor: AppColors.body,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -139,18 +139,14 @@ class _ProductScreenState extends State<ProductScreen> {
               showLabel: false,
               suffixIcon: const Icon(Icons.search),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 6),
 
             // Product count
             Text(
               'Menampilkan ${filteredProducts.length} produk',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
+              style: AppTextStyles.caption,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Product list
             Expanded(

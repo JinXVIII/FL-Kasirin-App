@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
 
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -16,10 +17,26 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withAlpha(4),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
@@ -28,24 +45,22 @@ class ProductCard extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
                 color: Colors.grey[200],
-                image: product['imageUrl'] != null
-                    ? DecorationImage(
-                        image: NetworkImage(product['imageUrl']),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image: DecorationImage(
+                  image: product['imageUrl'] != null
+                      ? NetworkImage(product['imageUrl'])
+                      : const AssetImage('assets/images/no-image.png'),
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: product['imageUrl'] == null
-                  ? const _FoodIconPlaceholder()
-                  : null,
             ),
             const SizedBox(width: 16.0),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 6,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -58,26 +73,21 @@ class ProductCard extends StatelessWidget {
                     ),
                     child: Text(
                       product['category'] ?? 'Kategori tidak tersedia',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: AppTextStyles.whiteBodySmall.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     product['name'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.heading4.copyWith(fontSize: 14),
                   ),
                   Text(
                     product['price'] != null
                         ? 'Rp ${product['price'].toString()}'
                         : 'Harga tidak tersedia',
-                    style: TextStyle(fontSize: 12.0),
+                    style: AppTextStyles.priceSmall,
                   ),
                 ],
               ),
@@ -85,32 +95,34 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 16.0),
             Column(
               children: [
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  tooltip: 'Edit Produk',
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withAlpha(10),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    tooltip: 'Edit Produk',
+                  ),
                 ),
-                IconButton(
-                  onPressed: onDelete,
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  tooltip: 'Hapus Produk',
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.withAlpha(10),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Hapus Produk',
+                  ),
                 ),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _FoodIconPlaceholder extends StatelessWidget {
-  const _FoodIconPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Icon(Icons.fastfood, size: 48, color: Colors.grey),
     );
   }
 }

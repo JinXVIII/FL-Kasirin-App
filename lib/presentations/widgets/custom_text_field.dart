@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../cores/themes/text_styles.dart';
+
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -26,10 +28,7 @@ class CustomTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showLabel) ...[
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-          ),
+          Text(label, style: AppTextStyles.bodyMedium),
           const SizedBox(height: 6.0),
         ],
         TextFormField(
@@ -39,15 +38,17 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           decoration: InputDecoration(
             suffixIcon: suffixIcon,
+            suffixIconColor: Colors.grey,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
             ),
             hintText: label,
+            hintStyle: AppTextStyles.caption.copyWith(fontSize: 14),
           ),
         ),
       ],
