@@ -67,7 +67,7 @@ class FinancialInformationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Menu Terjual Hari Ini",
+                        "Produk Terjual Hari Ini",
                         style: AppTextStyles.whiteBodySmall,
                       ),
                       Text("10", style: AppTextStyles.whiteHeading4),
@@ -80,7 +80,7 @@ class FinancialInformationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Menu Terjual Bulan Ini",
+                        "Produk Terjual Bulan Ini",
                         style: AppTextStyles.whiteBodySmall,
                       ),
                       Text("100", style: AppTextStyles.whiteHeading4),
