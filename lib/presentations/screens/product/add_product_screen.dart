@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../cores/themes/text_styles.dart';
+
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
@@ -22,7 +24,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _stockController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
-  String _selectedCategory = 'Makanan';
+  String? _selectedCategory;
   final List<String> _categories = ['Makanan', 'Minuman', 'Snack', 'Lainnya'];
 
   @override
@@ -54,10 +56,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Tambah Produk",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Tambah Produk", style: AppTextStyles.titlePage),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

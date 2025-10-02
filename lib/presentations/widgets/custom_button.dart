@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../cores/constants/colors.dart';
+import '../../cores/themes/text_styles.dart';
 
 enum ButtonStyle { filled, outlined }
 
@@ -13,11 +14,11 @@ class CustomButton extends StatelessWidget {
     this.color = AppColors.primary,
     this.textColor = Colors.white,
     this.width = double.infinity,
-    this.height = 50.0,
-    this.borderRadius = 16.0,
+    this.height = 50,
+    this.borderRadius = 8,
     this.icon,
     this.disabled = false,
-    this.fontSize = 16.0,
+    this.fontSize = 14,
   });
 
   const CustomButton.outlined({
@@ -28,11 +29,11 @@ class CustomButton extends StatelessWidget {
     this.color = AppColors.white,
     this.textColor = AppColors.primary,
     this.width = double.infinity,
-    this.height = 50.0,
-    this.borderRadius = 16.0,
+    this.height = 5,
+    this.borderRadius = 8,
     this.icon,
     this.disabled = false,
-    this.fontSize = 16.0,
+    this.fontSize = 14,
   });
 
   final Function() onPressed;
@@ -68,10 +69,15 @@ class CustomButton extends StatelessWidget {
                   if (icon != null) const SizedBox(width: 10.0),
                   Text(
                     label,
-                    style: TextStyle(
+                    // style: TextStyle(
+                    //   color: textColor,
+                    //   fontSize: fontSize,
+                    //   fontWeight: FontWeight.w600,
+                    // ),
+                    style: AppTextStyles.heading4.copyWith(
                       color: textColor,
                       fontSize: fontSize,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -93,10 +99,14 @@ class CustomButton extends StatelessWidget {
                   if (icon != null) const SizedBox(width: 10.0),
                   Text(
                     label,
-                    style: TextStyle(
+                    // style: TextStyle(
+                    //   color: textColor,
+                    //   fontSize: fontSize,
+                    //   fontWeight: FontWeight.w600,
+                    // ),
+                    style: AppTextStyles.heading4.copyWith(
                       color: textColor,
                       fontSize: fontSize,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
