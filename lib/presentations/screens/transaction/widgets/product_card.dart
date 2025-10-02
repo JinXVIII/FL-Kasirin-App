@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
+
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
   final int quantity;
@@ -20,7 +23,8 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,45 +34,35 @@ class ProductCard extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+                  top: Radius.circular(8),
                 ),
                 color: Colors.grey[200],
-                image: product['imageUrl'] != null
-                    ? DecorationImage(
-                        image: NetworkImage(product['imageUrl']),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image: DecorationImage(
+                  image: product['imageUrl'] != null
+                      ? NetworkImage(product['imageUrl'])
+                      : const AssetImage('assets/images/no-image.png'),
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: product['imageUrl'] == null
-                  ? const Icon(Icons.fastfood, size: 48, color: Colors.grey)
-                  : null,
             ),
           ),
 
           // Product details
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   product['name'],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.heading4.copyWith(fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-
+                const SizedBox(height: 2.0),
                 Text(
                   'Rp ${product['price'].toString()}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.priceSmall,
                 ),
                 const SizedBox(height: 8),
 
@@ -79,6 +73,7 @@ class ProductCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: onAddToCart,
                           style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.white,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -94,51 +89,44 @@ class ProductCard extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: onDecreaseQuantity,
                               style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.white,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 8,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(8),
-                                    topLeft: Radius.circular(8),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8),
                                   ),
                                 ),
                               ),
                               child: const Icon(Icons.remove, size: 18),
                             ),
                           ),
+
                           // Quantity display
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 20,
                               vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              border: Border(
-                                top: BorderSide(color: Colors.grey[300]!),
-                                bottom: BorderSide(color: Colors.grey[300]!),
-                              ),
                             ),
                             child: Text(
                               quantity.toString(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: AppTextStyles.bodyMedium,
                             ),
                           ),
+
                           // Increase button
                           Expanded(
                             child: ElevatedButton(
                               onPressed: onIncreaseQuantity,
                               style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.white,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 8,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(8),
-                                    topRight: Radius.circular(8),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8),
                                   ),
                                 ),
                               ),

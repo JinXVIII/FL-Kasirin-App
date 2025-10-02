@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../providers/cart_provider.dart';
 
+import '../../../cores/constants/colors.dart';
+import '../../../cores/themes/text_styles.dart';
 import '../../../cores/routes/app_router.dart';
 
 import '../../widgets/custom_button.dart';
@@ -101,37 +103,20 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Kasir",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Kasir", style: AppTextStyles.titlePage),
         centerTitle: true,
       ),
+      backgroundColor: AppColors.body,
       body: Column(
         children: [
           // Search bar
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: CustomTextField(
-                controller: _searchController,
-                label: "Cari Produk...",
-                showLabel: false,
-                suffixIcon: const Icon(Icons.search),
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: CustomTextField(
+              controller: _searchController,
+              label: "Cari Produk...",
+              showLabel: false,
+              suffixIcon: const Icon(Icons.search),
             ),
           ),
 
@@ -142,7 +127,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
               child: Consumer<CartProvider>(
                 builder: (context, cartProvider, child) {
                   return _filteredProducts.isEmpty
-                      ? const Center(child: Text('Tidak ada produk ditemukan'))
+                      ? Center(
+                          child: Text(
+                            'Tidak ada produk ditemukan',
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        )
                       : GridView.builder(
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
@@ -181,33 +171,24 @@ class _TransactionScreenState extends State<TransactionScreen> {
           Consumer<CartProvider>(
             builder: (context, cartProvider, child) {
               return Container(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.white,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Total price
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Total Harga',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        const Text('Total', style: AppTextStyles.caption),
                         Text(
                           'Rp ${cartProvider.totalPrice.toString()}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTextStyles.heading4,
                         ),
                       ],
                     ),
@@ -215,6 +196,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
                     // Checkout button
                     CustomButton.filled(
+                      height: 40,
+                      width: 150,
+                      borderRadius: 6,
                       onPressed: () {
                         if (cartProvider.cartItems.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -227,7 +211,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                         }
                         context.pushNamed(RouteConstants.checkout);
                       },
-                      label: "Checkout (${cartProvider.totalItems} items)",
+                      label: "Checkout (${cartProvider.totalItems})",
                     ),
                   ],
                 ),
