@@ -1,9 +1,11 @@
-import 'package:fe_kasirin_app/presentations/widgets/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../cores/themes/text_styles.dart';
+
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/image_picker_widget.dart';
 
@@ -151,10 +153,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Edit Produk",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: Text("Edit Produk", style: AppTextStyles.titlePage),
         centerTitle: true,
       ),
       body: _isLoading
@@ -169,6 +168,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     // Product image
                     ImagePickerWidget(
                       label: "Gambar Produk",
+                      initialImageUrl: _product!['imageUrl'],
                       onChanged: (XFile? value) {
                         if (value != null) {
                           _imageUrlController.text = value.path;

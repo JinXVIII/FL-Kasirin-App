@@ -11,6 +11,7 @@ class ImagePickerWidget extends StatefulWidget {
   final void Function(XFile? file) onChanged;
   final bool showLabel;
   final String? hintText;
+  final String? initialImageUrl;
 
   const ImagePickerWidget({
     super.key,
@@ -18,6 +19,7 @@ class ImagePickerWidget extends StatefulWidget {
     required this.onChanged,
     this.showLabel = true,
     this.hintText = 'Upload Foto',
+    this.initialImageUrl,
   });
 
   @override
@@ -26,6 +28,14 @@ class ImagePickerWidget extends StatefulWidget {
 
 class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   XFile? _imageFile;
+  bool _hasInitialImage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasInitialImage =
+        widget.initialImageUrl != null && widget.initialImageUrl!.isNotEmpty;
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(
@@ -35,6 +45,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = pickedFile;
+        _hasInitialImage = false;
       });
       widget.onChanged(_imageFile);
     } else {
@@ -73,6 +84,19 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                       child: Image.file(
                         File(_imageFile!.path),
                         fit: BoxFit.cover,
+                      ),
+                    )
+                  : _hasInitialImage
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        widget.initialImageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          );
+                        },
                       ),
                     )
                   : Center(
