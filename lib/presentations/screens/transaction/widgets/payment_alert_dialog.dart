@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/themes/text_styles.dart';
 
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_dropdown.dart';
@@ -117,6 +118,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isCashPayment = _selectedPaymentMethod == 'Tunai';
+
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       shape: const RoundedRectangleBorder(
@@ -137,10 +140,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Pembayaran',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
+                  const Text('Pembayaran', style: AppTextStyles.heading3),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
@@ -168,19 +168,16 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       children: [
                         const Text(
                           'Total Pembayaran',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.bodyLarge,
                         ),
                         const SizedBox(height: 8),
+
                         Center(
                           child: Text(
                             'Rp ${widget.totalPrice.toString()}',
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.w800,
+                            style: AppTextStyles.heading1.copyWith(
                               color: AppColors.primary,
+                              fontSize: 36,
                             ),
                           ),
                         ),
@@ -197,56 +194,49 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         if (value != null) {
                           setState(() {
                             _selectedPaymentMethod = value;
+                            // Reset change amount when payment method changes
+                            if (!isCashPayment) {
+                              _changeAmount = 0;
+                            }
                           });
                         }
                       },
                     ),
                     const SizedBox(height: 16),
 
-                    // Payment amount input
-                    CustomTextField(
-                      controller: _paymentController,
-                      label: 'Uang Bayar',
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        _calculateChange();
-                      },
-                    ),
-                    const SizedBox(height: 8),
+                    // Payment amount input - only show for cash payment
+                    if (isCashPayment) ...[
+                      CustomTextField(
+                        controller: _paymentController,
+                        label: 'Uang Bayar',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          _calculateChange();
+                        },
+                      ),
+                      const SizedBox(height: 8),
 
-                    // Change amount
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Kembalian',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                      // Change amount
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Kembalian', style: AppTextStyles.bodyMedium),
+                          Text(
+                            'Rp ${_changeAmount.toString()}',
+                            style: AppTextStyles.priceSmall.copyWith(
+                              color: _changeAmount >= 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Rp ${_changeAmount.toString()}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: _changeAmount >= 0
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
 
-                    // Quick amount buttons - only show for cash payment
-                    if (_selectedPaymentMethod == 'Tunai') ...[
+                      // Quick amount buttons - only show for cash payment
                       const Text(
                         'Pilihan Jumlah Bayar',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.bodyMedium,
                       ),
                       const SizedBox(height: 8),
 
@@ -284,6 +274,32 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                                 );
                               }),
                         ],
+                      ),
+                    ] else ...[
+                      // Non-cash payment message
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Pembayaran dengan $_selectedPaymentMethod',
+                              style: AppTextStyles.bodyMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Tidak ada kembalian untuk metode pembayaran ini',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ],
