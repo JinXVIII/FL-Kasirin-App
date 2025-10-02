@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../cores/routes/app_router.dart';
+import '../../../cores/constants/colors.dart';
+import '../../../cores/themes/text_styles.dart';
+
 import '../../providers/cart_provider.dart';
+
 import '../../widgets/custom_button.dart';
 import 'widgets/checkout_item_card.dart';
 import 'widgets/payment_alert_dialog.dart';
@@ -15,12 +18,10 @@ class CheckoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Checkout",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Checkout", style: AppTextStyles.titlePage),
         centerTitle: true,
       ),
+      backgroundColor: AppColors.body,
       body: Consumer<CartProvider>(
         builder: (context, cartProvider, child) {
           if (cartProvider.cartItems.isEmpty) {
@@ -31,12 +32,12 @@ class CheckoutScreen extends StatelessWidget {
                   Icon(
                     Icons.shopping_cart_outlined,
                     size: 64,
-                    color: Colors.grey,
+                    color: AppColors.black,
                   ),
                   SizedBox(height: 16),
                   Text(
                     'Keranjang belanja kosong',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: AppTextStyles.heading4,
                   ),
                 ],
               ),
@@ -53,13 +54,11 @@ class CheckoutScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Informasi Pesanan',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        'Rincian Pesanan',
+                        style: AppTextStyles.heading4,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+
                       Expanded(
                         child: ListView.builder(
                           itemCount: cartProvider.cartItems.length,
@@ -95,7 +94,7 @@ class CheckoutScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.body,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
@@ -106,23 +105,14 @@ class CheckoutScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Total Harga',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        const Text('Total Harga', style: AppTextStyles.caption),
                         Text(
                           'Rp ${cartProvider.totalPrice.toString()}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTextStyles.heading4,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Pay button
                     CustomButton.filled(
