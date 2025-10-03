@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../cores/routes/app_router.dart';
+import '../../../../cores/themes/text_styles.dart';
 
 class SalesHistoryItemCard extends StatelessWidget {
   final Map<String, dynamic> salesData;
@@ -39,17 +40,11 @@ class SalesHistoryItemCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    transactionNumber,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(transactionNumber, style: AppTextStyles.heading4),
 
                   Text(
                     DateFormat('dd MMM yyyy, HH:mm').format(transactionDate),
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: AppTextStyles.caption,
                   ),
                 ],
               ),
@@ -60,20 +55,13 @@ class SalesHistoryItemCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.payment, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(
-                    paymentMethod,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
+                  Text(paymentMethod, style: AppTextStyles.caption),
 
                   Spacer(),
 
                   Text(
                     'Rp ${NumberFormat('#,###').format(totalAmount)}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
-                    ),
+                    style: AppTextStyles.priceSmall,
                   ),
                 ],
               ),

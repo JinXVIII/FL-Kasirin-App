@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../cores/constants/colors.dart';
+import '../../../cores/themes/text_styles.dart';
+
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import 'widgets/sales_history_item_card.dart';
@@ -146,6 +149,27 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              onSurface: AppColors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            ),
+            textTheme: const TextTheme(
+              bodyLarge: TextStyle(fontFamily: 'Poppins'),
+              bodyMedium: TextStyle(fontFamily: 'Poppins'),
+              labelLarge: TextStyle(fontFamily: 'Poppins'),
+              labelSmall: TextStyle(fontFamily: 'Poppins'),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -161,6 +185,27 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              onSurface: AppColors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            ),
+            textTheme: const TextTheme(
+              bodyLarge: TextStyle(fontFamily: 'Poppins'),
+              bodyMedium: TextStyle(fontFamily: 'Poppins'),
+              labelLarge: TextStyle(fontFamily: 'Poppins'),
+              labelSmall: TextStyle(fontFamily: 'Poppins'),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -201,10 +246,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Riwayat Penjualan",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Riwayat Penjualan", style: AppTextStyles.titlePage),
         centerTitle: true,
       ),
       body: Column(
@@ -274,18 +316,15 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                     children: [
                       const Text(
                         'Daftar Penjualan',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTextStyles.heading4,
                       ),
                       Text(
                         '${_filteredSalesData.length} transaksi',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: AppTextStyles.caption,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   // Sales history list
                   _filteredSalesData.isEmpty
@@ -301,10 +340,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                               SizedBox(height: 16),
                               Text(
                                 'Tidak ada data penjualan',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                ),
+                                style: AppTextStyles.heading4,
                               ),
                             ],
                           ),
