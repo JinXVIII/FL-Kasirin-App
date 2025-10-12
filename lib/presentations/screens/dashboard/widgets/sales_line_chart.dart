@@ -10,31 +10,64 @@ class SalesLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.5,
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: AppColors.card,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+    return Column(
+      children: [
+        // Section header
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Penjualan Mingguan', style: AppTextStyles.heading4),
+              Row(
+                children: [
+                  Text('Sales Performance', style: AppTextStyles.heading3),
+                  const SizedBox(width: 8),
+                  Icon(Icons.trending_up, color: AppColors.green, size: 24),
+                ],
+              ),
               const SizedBox(height: 4),
 
-              const Text(
-                'Total pendapatan 7 hari terakhir',
-                style: AppTextStyles.bodySmall,
+              Text(
+                'Weekday analytical sales product',
+                style: AppTextStyles.caption,
               ),
-              const SizedBox(height: 12),
-
-              Expanded(child: LineChart(mainData())),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: 12),
+
+        AspectRatio(
+          aspectRatio: 1.5,
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: AppColors.white,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Penjualan Mingguan',
+                    style: AppTextStyles.heading4,
+                  ),
+                  const SizedBox(height: 4),
+
+                  const Text(
+                    'Total pendapatan 7 hari terakhir',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+
+                  Expanded(child: LineChart(mainData())),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
