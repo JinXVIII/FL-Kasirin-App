@@ -6,6 +6,7 @@ import '../../../cores/routes/app_router.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 
+import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
 import 'widgets/menu_item_card.dart';
 import 'widgets/sales_line_chart.dart';
@@ -21,6 +22,10 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isProfileCompleted = false;
   bool _isLoading = true;
+
+  // User profile data (for demonstration)
+  final String _userName = "John Doe";
+  final String _userEmail = "john.doe@example.com";
 
   @override
   void initState() {
@@ -95,26 +100,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {"icon": Icons.help_outline, "label": "Bantuan", "onTap": () {}},
     ];
 
+    // Get current route
+    final String currentRoute = GoRouterState.of(context).uri.toString();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Dashboard", style: AppTextStyles.titlePage),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.orange),
-          onPressed: () {},
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.menu, color: AppColors.orange),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
         ),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.notifications_none,
-              color: AppColors.orange,
-              // size: 24,
-            ),
+            icon: const Icon(Icons.notifications_none, color: AppColors.orange),
             onPressed: () {},
           ),
         ],
       ),
       backgroundColor: AppColors.body,
+      drawer: AppDrawer(
+        userName: _userName,
+        userEmail: _userEmail,
+        currentRoute: currentRoute,
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
