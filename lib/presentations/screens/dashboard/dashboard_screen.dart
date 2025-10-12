@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../cores/routes/app_router.dart';
 import '../../../cores/constants/colors.dart';
@@ -8,9 +9,44 @@ import '../../../cores/themes/text_styles.dart';
 import 'widgets/financial_information_card.dart';
 import 'widgets/menu_item_card.dart';
 import 'widgets/sales_line_chart.dart';
+import 'widgets/profile_completion_modal.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isProfileCompleted = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkProfileStatus();
+  }
+
+  Future<void> _checkProfileStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isProfileCompleted = prefs.getBool('isProfileCompleted') ?? false;
+
+    setState(() {
+      _isProfileCompleted = isProfileCompleted;
+      _isLoading = false;
+    });
+
+    // Show modal if profile is not completed
+    if (!isProfileCompleted) {
+      // Add a small delay to ensure the widget is fully built
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          ProfileCompletionModal.show(context);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,50 +115,52 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
       backgroundColor: AppColors.body,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // financial information card
-              FinancialInformationCard(),
-              const SizedBox(height: 14),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // financial information card
+                    FinancialInformationCard(),
+                    const SizedBox(height: 14),
 
-              // Menu app
-              LayoutBuilder(
-                builder: (context, constraint) {
-                  var spacing = 8.0;
-                  var rowCount = 4;
+                    // Menu app
+                    LayoutBuilder(
+                      builder: (context, constraint) {
+                        var spacing = 8.0;
+                        var rowCount = 4;
 
-                  return Wrap(
-                    runSpacing: spacing,
-                    spacing: spacing,
-                    children: List.generate(menus.length, (index) {
-                      var item = menus[index];
-                      var isProFeature = item["isPro"] ?? false;
+                        return Wrap(
+                          runSpacing: spacing,
+                          spacing: spacing,
+                          children: List.generate(menus.length, (index) {
+                            var item = menus[index];
+                            var isProFeature = item["isPro"] ?? false;
 
-                      var size =
-                          (constraint.biggest.width -
-                              ((rowCount + 1) * spacing)) /
-                          rowCount;
+                            var size =
+                                (constraint.biggest.width -
+                                    ((rowCount + 1) * spacing)) /
+                                rowCount;
 
-                      return MenuItemCard(
-                        item: item,
-                        size: size,
-                        isProFeature: isProFeature,
-                      );
-                    }),
-                  );
-                },
+                            return MenuItemCard(
+                              item: item,
+                              size: size,
+                              isProFeature: isProFeature,
+                            );
+                          }),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Chart sales
+                    SalesLineChart(),
+                  ],
+                ),
               ),
-              const SizedBox(height: 14),
-
-              // Chart sales
-              SalesLineChart(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

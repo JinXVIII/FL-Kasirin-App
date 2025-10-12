@@ -13,6 +13,7 @@ class CustomButton extends StatelessWidget {
     this.style = ButtonStyle.filled,
     this.color = AppColors.primary,
     this.textColor = Colors.white,
+    this.sideColor,
     this.width = double.infinity,
     this.height = 50,
     this.borderRadius = 8,
@@ -27,9 +28,10 @@ class CustomButton extends StatelessWidget {
     required this.label,
     this.style = ButtonStyle.outlined,
     this.color = AppColors.white,
+    this.sideColor = Colors.grey,
     this.textColor = AppColors.primary,
     this.width = double.infinity,
-    this.height = 5,
+    this.height = 50,
     this.borderRadius = 8,
     this.icon,
     this.disabled = false,
@@ -40,6 +42,7 @@ class CustomButton extends StatelessWidget {
   final String label;
   final ButtonStyle style;
   final Color color;
+  final Color? sideColor;
   final Color textColor;
   final double width;
   final double height;
@@ -69,11 +72,6 @@ class CustomButton extends StatelessWidget {
                   if (icon != null) const SizedBox(width: 10.0),
                   Text(
                     label,
-                    // style: TextStyle(
-                    //   color: textColor,
-                    //   fontSize: fontSize,
-                    //   fontWeight: FontWeight.w600,
-                    // ),
                     style: AppTextStyles.heading4.copyWith(
                       color: textColor,
                       fontSize: fontSize,
@@ -87,7 +85,7 @@ class CustomButton extends StatelessWidget {
               onPressed: disabled ? null : onPressed,
               style: OutlinedButton.styleFrom(
                 backgroundColor: color,
-                side: const BorderSide(color: Colors.grey),
+                side: BorderSide(color: sideColor ?? textColor),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(borderRadius),
                 ),
@@ -99,11 +97,6 @@ class CustomButton extends StatelessWidget {
                   if (icon != null) const SizedBox(width: 10.0),
                   Text(
                     label,
-                    // style: TextStyle(
-                    //   color: textColor,
-                    //   fontSize: fontSize,
-                    //   fontWeight: FontWeight.w600,
-                    // ),
                     style: AppTextStyles.heading4.copyWith(
                       color: textColor,
                       fontSize: fontSize,
