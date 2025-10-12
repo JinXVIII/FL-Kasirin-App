@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../presentations/screens/splash/splash_screen.dart';
 import '../../presentations/screens/auth/login_screen.dart';
 import '../../presentations/screens/auth/register_screen.dart';
+import '../../presentations/screens/profile/profile_screen.dart';
 import '../../presentations/screens/dashboard/dashboard_screen.dart';
 import '../../presentations/screens/product/product_screen.dart';
 import '../../presentations/screens/product/add_product_screen.dart';
@@ -21,6 +22,9 @@ class RouteConstants {
 
   static const String register = 'register';
   static const String registerPath = '/register';
+
+  static const String profile = 'profile';
+  static const String profilePath = '/profile';
 
   static const String dashboard = 'dashboard';
   static const String dashboardPath = '/dashboard';
@@ -65,6 +69,11 @@ class AppRouter {
         name: RouteConstants.register,
         path: RouteConstants.registerPath,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        name: RouteConstants.profile,
+        path: RouteConstants.profilePath,
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         name: RouteConstants.dashboard,

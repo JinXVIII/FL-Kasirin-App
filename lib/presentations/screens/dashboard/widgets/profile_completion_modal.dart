@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
+
 import '../../../widgets/custom_button.dart';
 
 class ProfileCompletionModal {
@@ -83,7 +86,7 @@ class ProfileCompletionModal {
                   Expanded(
                     child: CustomButton.filled(
                       onPressed: () {
-                        Navigator.pop(context);
+                        context.push('/profile');
                       },
                       label: 'Ok',
                       color: AppColors.orange,
