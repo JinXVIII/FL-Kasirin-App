@@ -10,6 +10,7 @@ import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
 import 'widgets/menu_item_card.dart';
 import 'widgets/sales_line_chart.dart';
+import 'widgets/best_profit_products.dart';
 import 'widgets/profile_completion_modal.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -168,10 +169,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         );
                       },
                     ),
+                    const SizedBox(height: 18),
+
+                    // Best Profit Products
+                    BestProfitProducts(),
                     const SizedBox(height: 14),
 
                     // Chart sales
                     SalesLineChart(),
+                    const SizedBox(height: 14),
                   ],
                 ),
               ),
