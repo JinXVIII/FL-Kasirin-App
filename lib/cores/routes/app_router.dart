@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import '../../presentations/screens/splash/splash_screen.dart';
+import '../../presentations/screens/auth/login_screen.dart';
+import '../../presentations/screens/auth/register_screen.dart';
 import '../../presentations/screens/dashboard/dashboard_screen.dart';
 import '../../presentations/screens/product/product_screen.dart';
 import '../../presentations/screens/product/add_product_screen.dart';
@@ -10,6 +13,15 @@ import '../../presentations/screens/sales_history/sales_history_screen.dart';
 import '../../presentations/screens/sales_history/sales_history_detail_screen.dart';
 
 class RouteConstants {
+  static const String splash = 'splash';
+  static const String splashPath = '/';
+
+  static const String login = 'login';
+  static const String loginPath = '/login';
+
+  static const String register = 'register';
+  static const String registerPath = '/register';
+
   static const String dashboard = 'dashboard';
   static const String dashboardPath = '/dashboard';
 
@@ -37,8 +49,23 @@ class RouteConstants {
 
 class AppRouter {
   final GoRouter router = GoRouter(
-    initialLocation: RouteConstants.dashboardPath,
+    initialLocation: RouteConstants.splashPath,
     routes: [
+      GoRoute(
+        name: RouteConstants.splash,
+        path: RouteConstants.splashPath,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        name: RouteConstants.login,
+        path: RouteConstants.loginPath,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        name: RouteConstants.register,
+        path: RouteConstants.registerPath,
+        builder: (context, state) => const RegisterScreen(),
+      ),
       GoRoute(
         name: RouteConstants.dashboard,
         path: RouteConstants.dashboardPath,
