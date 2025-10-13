@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
+
+import '../../../presentations/providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,16 +18,25 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToLogin();
+    _checkAuthenticationAndNavigate();
   }
 
-  void _navigateToLogin() {
-    // Delay for 2 seconds then navigate to login screen
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.pushReplacement('/login');
+  void _checkAuthenticationAndNavigate() async {
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (mounted) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (authProvider.isAuthenticated) {
+        if (mounted) {
+          context.pushReplacement('/dashboard');
+        }
+      } else {
+        if (mounted) {
+          context.pushReplacement('/login');
+        }
       }
-    });
+    }
   }
 
   @override

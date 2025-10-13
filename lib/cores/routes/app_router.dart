@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../../presentations/providers/auth_provider.dart';
+
 import '../../presentations/screens/splash/splash_screen.dart';
 import '../../presentations/screens/auth/login_screen.dart';
 import '../../presentations/screens/auth/register_screen.dart';
@@ -52,89 +54,117 @@ class RouteConstants {
 }
 
 class AppRouter {
-  final GoRouter router = GoRouter(
-    initialLocation: RouteConstants.splashPath,
-    routes: [
-      GoRoute(
-        name: RouteConstants.splash,
-        path: RouteConstants.splashPath,
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.login,
-        path: RouteConstants.loginPath,
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.register,
-        path: RouteConstants.registerPath,
-        builder: (context, state) => const RegisterScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.profile,
-        path: RouteConstants.profilePath,
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.dashboard,
-        path: RouteConstants.dashboardPath,
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.product,
-        path: RouteConstants.productPath,
-        builder: (context, state) => const ProductScreen(),
+  final GoRouter router;
+
+  AppRouter({required AuthProvider authProvider})
+    : router = GoRouter(
+        initialLocation: RouteConstants.splashPath,
+        redirect: (context, state) {
+          final isAuthenticated = authProvider.isAuthenticated;
+          final isAuthRoute =
+              state.uri.path.startsWith('/login') ||
+              state.uri.path.startsWith('/register');
+          final isSplashRoute = state.uri.path == RouteConstants.splashPath;
+
+          if (!isAuthenticated && !isAuthRoute && !isSplashRoute) {
+            return RouteConstants.loginPath;
+          }
+
+          if (isAuthenticated && isAuthRoute && !isSplashRoute) {
+            return RouteConstants.dashboardPath;
+          }
+
+          return null;
+        },
         routes: [
           GoRoute(
-            name: RouteConstants.addProduct,
-            path: RouteConstants.addProductPath,
-            builder: (context, state) => const AddProductScreen(),
+            name: RouteConstants.splash,
+            path: RouteConstants.splashPath,
+            builder: (context, state) => const SplashScreen(),
           ),
           GoRoute(
-            name: RouteConstants.editProduct,
-            path: RouteConstants.editProductPath,
+            name: RouteConstants.login,
+            path: RouteConstants.loginPath,
+            builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.register,
+            path: RouteConstants.registerPath,
+            builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.profile,
+            path: RouteConstants.profilePath,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.dashboard,
+            path: RouteConstants.dashboardPath,
+            builder: (context, state) => const DashboardScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.product,
+            path: RouteConstants.productPath,
+            builder: (context, state) => const ProductScreen(),
+            routes: [
+              GoRoute(
+                name: RouteConstants.addProduct,
+                path: RouteConstants.addProductPath,
+                builder: (context, state) => const AddProductScreen(),
+              ),
+              GoRoute(
+                name: RouteConstants.editProduct,
+                path: RouteConstants.editProductPath,
+                builder: (context, state) {
+                  final productId = state.pathParameters['id']!;
+                  return EditProductScreen(productId: productId);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            name: RouteConstants.transaction,
+            path: RouteConstants.transactionPath,
+            builder: (context, state) => const TransactionScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.checkout,
+            path: RouteConstants.checkoutPath,
+            builder: (context, state) => const CheckoutScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.salesHistory,
+            path: RouteConstants.salesHistoryPath,
+            builder: (context, state) => const SalesHistoryScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.salesHistoryDetail,
+            path: RouteConstants.salesHistoryDetailPath,
             builder: (context, state) {
-              final productId = state.pathParameters['id']!;
-              return EditProductScreen(productId: productId);
+              final id = state.pathParameters['id']!;
+              return SalesHistoryDetailScreen(
+                salesData: {
+                  'id': int.parse(id),
+                  'transactionNumber': 'TRX-20230921-001',
+                  'transactionDate': DateTime.now(),
+                  'totalAmount': 42000,
+                  'paymentMethod': 'E-Wallet',
+                  'items': [
+                    {
+                      'productName': 'Nasi Goreng',
+                      'quantity': 1,
+                      'price': 25000,
+                    },
+                    {
+                      'productName': 'Kopi Hitam',
+                      'quantity': 1,
+                      'price': 15000,
+                    },
+                  ],
+                },
+              );
             },
           ),
         ],
-      ),
-      GoRoute(
-        name: RouteConstants.transaction,
-        path: RouteConstants.transactionPath,
-        builder: (context, state) => const TransactionScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.checkout,
-        path: RouteConstants.checkoutPath,
-        builder: (context, state) => const CheckoutScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.salesHistory,
-        path: RouteConstants.salesHistoryPath,
-        builder: (context, state) => const SalesHistoryScreen(),
-      ),
-      GoRoute(
-        name: RouteConstants.salesHistoryDetail,
-        path: RouteConstants.salesHistoryDetailPath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return SalesHistoryDetailScreen(
-            salesData: {
-              'id': int.parse(id),
-              'transactionNumber': 'TRX-20230921-001',
-              'transactionDate': DateTime.now(),
-              'totalAmount': 42000,
-              'paymentMethod': 'E-Wallet',
-              'items': [
-                {'productName': 'Nasi Goreng', 'quantity': 1, 'price': 25000},
-                {'productName': 'Kopi Hitam', 'quantity': 1, 'price': 15000},
-              ],
-            },
-          );
-        },
-      ),
-    ],
-  );
+      );
 }
