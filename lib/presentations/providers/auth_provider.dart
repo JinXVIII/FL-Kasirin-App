@@ -54,7 +54,8 @@ class AuthProvider extends ChangeNotifier {
 
       return result.fold(
         (error) {
-          _setError(error);
+          final errorMessage = error;
+          _setError(errorMessage);
           return false;
         },
         (authResponse) async {
@@ -66,7 +67,46 @@ class AuthProvider extends ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Login failed: ${e.toString()}');
+      final errorMessage = 'Login failed: ${e.toString()}';
+      _setError(errorMessage);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Register method
+  Future<bool> register(
+    String name,
+    String email,
+    String password,
+    String confirmPassword,
+  ) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final result = await _authRemoteDatasource.register(
+        name,
+        email,
+        password,
+        confirmPassword,
+      );
+
+      return result.fold(
+        (error) {
+          final errorMessage = error;
+          _setError(errorMessage);
+          return false;
+        },
+        (authResponse) async {
+          _clearError();
+          return true;
+        },
+      );
+    } catch (e) {
+      final errorMessage = 'Register failed: ${e.toString()}';
+      _setError(errorMessage);
       return false;
     } finally {
       _setLoading(false);
@@ -79,20 +119,16 @@ class AuthProvider extends ChangeNotifier {
     _clearError();
 
     try {
-      // Call logout API (ignore result for simplicity)
       await _authRemoteDatasource.logout();
 
-      // Remove local auth data
       await _authLocalDatasource.removeAuthData();
       _authData = null;
       _isAuthenticated = false;
 
-      // Notify listeners about state change
       notifyListeners();
       return true;
     } catch (e) {
       _setError('Logout failed: ${e.toString()}');
-      // Still remove local auth data even if API fails
       await _authLocalDatasource.removeAuthData();
       _authData = null;
       _isAuthenticated = false;

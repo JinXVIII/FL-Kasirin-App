@@ -5,7 +5,7 @@ class User {
   final String name;
   final String email;
   final dynamic emailVerifiedAt;
-  final String role;
+  final String? role;
   final dynamic profilePicture;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -14,9 +14,9 @@ class User {
     required this.id,
     required this.name,
     required this.email,
-    required this.emailVerifiedAt,
-    required this.role,
-    required this.profilePicture,
+    this.emailVerifiedAt,
+    this.role,
+    this.profilePicture,
     required this.createdAt,
     required this.updatedAt,
   });

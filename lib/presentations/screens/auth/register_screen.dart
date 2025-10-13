@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
+
+import '../../../presentations/providers/auth_provider.dart';
 
 import '../../../presentations/widgets/custom_button.dart';
 import '../../../presentations/widgets/custom_text_field.dart';
@@ -19,9 +22,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -45,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _register() async {
+    // Validate input fields
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
@@ -78,170 +82,193 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    // Use AuthProvider to register
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    debugPrint("Starting registration process");
 
-    // Simulate registration process
-    await Future.delayed(const Duration(seconds: 2));
+    final success = await authProvider.register(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+      _confirmPasswordController.text,
+    );
 
-    setState(() {
-      _isLoading = false;
-    });
+    debugPrint("Registration completed. Success: $success");
+    debugPrint("Error message: ${authProvider.errorMessage}");
 
-    // Navigate to login after successful registration
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registrasi berhasil! Silakan masuk'),
-          backgroundColor: AppColors.green,
-        ),
-      );
-      context.pushReplacement('/login');
+    if (success) {
+      debugPrint("Registration successful");
+      // Registration successful
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registrasi berhasil! Silakan masuk'),
+            backgroundColor: AppColors.green,
+          ),
+        );
+        context.pushReplacement('/login');
+      }
+    } else {
+      debugPrint("Registration failed. Error: ${authProvider.errorMessage}");
+      // Registration failed
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Registrasi gagal'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.body,
-      appBar: AppBar(
-        backgroundColor: AppColors.body,
-        elevation: 0,
-        title: Text(
-          'Daftar',
-          style: AppTextStyles.heading2.copyWith(color: AppColors.black),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight:
-                  MediaQuery.of(context).size.height -
-                  MediaQuery.of(context).viewInsets.bottom -
-                  MediaQuery.of(context).padding.top -
-                  kToolbarHeight -
-                  48,
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return Scaffold(
+          backgroundColor: AppColors.body,
+          appBar: AppBar(
+            backgroundColor: AppColors.body,
+            elevation: 0,
+            title: Text(
+              'Daftar',
+              style: AppTextStyles.heading2.copyWith(color: AppColors.black),
             ),
-            child: IntrinsicHeight(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 10),
-                  // App logo
-                  Center(
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.store,
-                        size: 40,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Welcome text
-                  Text(
-                    'Buat Akun Baru',
-                    style: AppTextStyles.heading2,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Silakan isi data diri Anda',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.grey,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  // Name field
-                  CustomTextField(
-                    controller: _nameController,
-                    label: 'Nama Lengkap',
-                  ),
-                  const SizedBox(height: 16),
-                  // Email field
-                  CustomTextField(
-                    controller: _emailController,
-                    label: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  // Password field
-                  CustomTextField(
-                    controller: _passwordController,
-                    label: 'Password',
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: _togglePasswordVisibility,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Confirm password field
-                  CustomTextField(
-                    controller: _confirmPasswordController,
-                    label: 'Konfirmasi Password',
-                    obscureText: _obscureConfirmPassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: _toggleConfirmPasswordVisibility,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Register button
-                  CustomButton.filled(
-                    onPressed: _register,
-                    label: _isLoading ? 'Memproses...' : 'Daftar',
-                    disabled: _isLoading,
-                  ),
-                  const SizedBox(height: 16),
-                  // Login link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            centerTitle: true,
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).viewInsets.bottom -
+                      MediaQuery.of(context).padding.top -
+                      kToolbarHeight -
+                      48,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Sudah punya akun? ',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          context.pushReplacement('/login');
-                        },
-                        child: Text(
-                          'Masuk',
-                          style: AppTextStyles.bodyMedium.copyWith(
+                      const SizedBox(height: 10),
+                      // App logo
+                      Center(
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
                             color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.store,
+                            size: 40,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      // Welcome text
+                      Text(
+                        'Buat Akun Baru',
+                        style: AppTextStyles.heading2,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Silakan isi data diri Anda',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      // Name field
+                      CustomTextField(
+                        controller: _nameController,
+                        label: 'Nama Lengkap',
+                      ),
+                      const SizedBox(height: 16),
+                      // Email field
+                      CustomTextField(
+                        controller: _emailController,
+                        label: 'Email',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+                      // Password field
+                      CustomTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: _togglePasswordVisibility,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Confirm password field
+                      CustomTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Konfirmasi Password',
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: _toggleConfirmPasswordVisibility,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Register button
+                      CustomButton.filled(
+                        onPressed: _register,
+                        label: authProvider.isLoading
+                            ? 'Memproses...'
+                            : 'Daftar',
+                        disabled: authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 16),
+                      // Login link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Sudah punya akun? ',
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              context.pushReplacement('/login');
+                            },
+                            child: Text(
+                              'Masuk',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
