@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../../../cores/routes/app_router.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
+
+import '../../../presentations/providers/auth_provider.dart';
 
 import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
@@ -21,12 +23,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  bool _isProfileCompleted = false;
+  final bool _isProfileCompleted = false;
   bool _isLoading = true;
-
-  // User profile data (for demonstration)
-  final String _userName = "John Doe";
-  final String _userEmail = "john.doe@example.com";
 
   @override
   void initState() {
@@ -35,16 +33,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _checkProfileStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isProfileCompleted = prefs.getBool('isProfileCompleted') ?? false;
-
     setState(() {
-      _isProfileCompleted = isProfileCompleted;
       _isLoading = false;
     });
 
     // Show modal if profile is not completed
-    if (!isProfileCompleted) {
+    if (!_isProfileCompleted) {
       // Add a small delay to ensure the widget is fully built
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
@@ -126,10 +120,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       backgroundColor: AppColors.body,
-      drawer: AppDrawer(
-        userName: _userName,
-        userEmail: _userEmail,
-        currentRoute: currentRoute,
+      drawer: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return AppDrawer(
+            userName: authProvider.user?.name ?? 'User',
+            userEmail: authProvider.user?.email ?? 'user@example.com',
+            currentRoute: currentRoute,
+          );
+        },
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

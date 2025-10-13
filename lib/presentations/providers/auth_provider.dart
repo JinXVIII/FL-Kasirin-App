@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/datasources/auth_local_datasource.dart';
@@ -10,6 +9,12 @@ class AuthProvider extends ChangeNotifier {
   final AuthRemoteDatasource _authRemoteDatasource;
   final AuthLocalDatasource _authLocalDatasource;
 
+  // State variables
+  bool _isLoading = false;
+  bool _isAuthenticated = false;
+  String? _errorMessage;
+  AuthResponseModel? _authData;
+
   AuthProvider({
     required AuthRemoteDatasource authRemoteDatasource,
     required AuthLocalDatasource authLocalDatasource,
@@ -17,12 +22,6 @@ class AuthProvider extends ChangeNotifier {
        _authLocalDatasource = authLocalDatasource {
     _checkAuthStatus();
   }
-
-  // State variables
-  bool _isLoading = false;
-  bool _isAuthenticated = false;
-  String? _errorMessage;
-  AuthResponseModel? _authData;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -32,84 +31,96 @@ class AuthProvider extends ChangeNotifier {
   User? get user => _authData?.user;
   String? get token => _authData?.token;
 
-  // Check authentication status on initialization
+  // Check authentication status
   Future<void> _checkAuthStatus() async {
-    _isLoading = true;
-    notifyListeners();
+    _setLoading(true);
 
-    final isAuth = await _authLocalDatasource.isAuth();
-    if (isAuth) {
-      final authData = await _authLocalDatasource.getAuthData();
-      if (authData != null) {
-        _authData = authData;
-        _isAuthenticated = true;
-      }
+    final authData = await _authLocalDatasource.getAuthData();
+    if (authData != null) {
+      _authData = authData;
+      _isAuthenticated = true;
     }
 
-    _isLoading = false;
-    notifyListeners();
+    _setLoading(false);
   }
 
   // Login method
   Future<bool> login(String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    _setLoading(true);
+    _clearError();
 
     try {
-      final Either<String, AuthResponseModel> result =
-          await _authRemoteDatasource.login(email, password);
+      final result = await _authRemoteDatasource.login(email, password);
 
-      result.fold(
+      return result.fold(
         (error) {
-          _errorMessage = error;
-          _isLoading = false;
-          notifyListeners();
+          _setError(error);
           return false;
         },
         (authResponse) async {
-          // Save auth data locally
           await _authLocalDatasource.saveAuthData(authResponse);
-
           _authData = authResponse;
           _isAuthenticated = true;
-          _errorMessage = null;
-          _isLoading = false;
-          notifyListeners();
+          _clearError();
           return true;
         },
       );
-      return result.isRight();
     } catch (e) {
-      _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
+      _setError('Login failed: ${e.toString()}');
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   // Logout method
-  Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<bool> logout() async {
+    _setLoading(true);
+    _clearError();
 
-    await _authLocalDatasource.removeAuthData();
+    try {
+      // Call logout API (ignore result for simplicity)
+      await _authRemoteDatasource.logout();
 
-    _authData = null;
-    _isAuthenticated = false;
-    _errorMessage = null;
-    _isLoading = false;
+      // Remove local auth data
+      await _authLocalDatasource.removeAuthData();
+      _authData = null;
+      _isAuthenticated = false;
+
+      // Notify listeners about state change
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Logout failed: ${e.toString()}');
+      // Still remove local auth data even if API fails
+      await _authLocalDatasource.removeAuthData();
+      _authData = null;
+      _isAuthenticated = false;
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Helper methods
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 
-  // Clear error message
-  void clearError() {
+  void _setError(String error) {
+    _errorMessage = error;
+    notifyListeners();
+  }
+
+  void _clearError() {
     _errorMessage = null;
     notifyListeners();
   }
+
+  // Public method to clear error
+  void clearError() => _clearError();
 
   // Refresh authentication status
-  Future<void> refreshAuthStatus() async {
-    await _checkAuthStatus();
-  }
+  Future<void> refreshAuthStatus() => _checkAuthStatus();
 }

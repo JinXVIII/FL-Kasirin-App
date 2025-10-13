@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../../cores/constants/colors.dart';
 import '../../cores/themes/text_styles.dart';
+
+import '../providers/auth_provider.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -17,17 +19,20 @@ class AppDrawer extends StatelessWidget {
   final String userEmail;
   final String currentRoute;
 
-  Future<void> _logout(BuildContext context) async {
-    // Clear any stored data (e.g., authentication tokens)
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-
-    // Navigate to login screen
-    if (context.mounted) {
-      context.pushReplacement('/login');
-    }
+  /// Shows a loading dialog during logout process
+  Widget _buildLoadingDialog() {
+    return const AlertDialog(
+      content: Row(
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 20),
+          Text("Sedang logout..."),
+        ],
+      ),
+    );
   }
 
+  /// Shows confirmation dialog before logout
   void _showLogoutConfirmation(BuildContext context) {
     showDialog(
       context: context,
@@ -39,9 +44,7 @@ class AppDrawer extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-            },
+            onPressed: () => Navigator.pop(context),
             child: Text(
               'Batal',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
@@ -49,7 +52,7 @@ class AppDrawer extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               _logout(context);
             },
             child: Text(
@@ -62,6 +65,36 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
+  /// Handles the logout process with loading indicator
+  Future<void> _logout(BuildContext context) async {
+    // Store navigator and router references before showing dialog
+    final navigator = Navigator.of(context);
+    final goRouter = GoRouter.of(context);
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _buildLoadingDialog(),
+    );
+
+    try {
+      // Perform logout through AuthProvider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.logout();
+    } catch (e) {
+      // Handle any potential errors during logout
+      debugPrint('Logout error: $e');
+    } finally {
+      // Always close the dialog and navigate
+      if (navigator.canPop()) {
+        navigator.pop();
+      }
+      goRouter.pushReplacement('/login');
+    }
+  }
+
+  /// Builds a menu item with active state styling
   Widget _buildMenuItem({
     required BuildContext context,
     required IconData icon,
@@ -92,7 +125,7 @@ class AppDrawer extends StatelessWidget {
           ),
         ),
         onTap: () {
-          Navigator.pop(context); // Close drawer
+          Navigator.pop(context);
           onTap();
         },
       ),
@@ -105,78 +138,96 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           // User profile header
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              userName,
-              style: AppTextStyles.heading3.copyWith(color: AppColors.white),
-            ),
-            accountEmail: Text(
-              userEmail,
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-            ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: AppColors.white,
-              child: Text(
-                userName.substring(0, 1).toUpperCase(),
-                style: AppTextStyles.heading2.copyWith(
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-            decoration: const BoxDecoration(color: AppColors.primary),
-          ),
+          _buildUserHeader(),
 
-          // Menu items with active container
-          _buildMenuItem(
-            context: context,
-            icon: Icons.dashboard_outlined,
-            title: 'Dashboard',
-            route: '/dashboard',
-            onTap: () {
-              // Already on dashboard, no need to navigate
-            },
-          ),
-          _buildMenuItem(
-            context: context,
-            icon: Icons.settings_outlined,
-            title: 'Pengaturan',
-            route: '/settings',
-            onTap: () {
-              // TODO: Navigate to settings screen
-            },
-          ),
-          _buildMenuItem(
-            context: context,
-            icon: Icons.star_outlined,
-            title: 'Fitur PRO',
-            route: '/pro-features',
-            onTap: () {
-              // TODO: Navigate to PRO features screen
-            },
-          ),
+          // Menu items
+          _buildMenuItems(context),
 
-          const Spacer(), // Push logout button to bottom
           // Logout button at the bottom
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close drawer
-                  _showLogoutConfirmation(context);
-                },
-                child: Text(
-                  'Keluar',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.red,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+          const Spacer(),
+          _buildLogoutButton(context),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the user profile header section
+  Widget _buildUserHeader() {
+    return UserAccountsDrawerHeader(
+      accountName: Text(
+        userName,
+        style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+      ),
+      accountEmail: Text(
+        userEmail,
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+      ),
+      currentAccountPicture: CircleAvatar(
+        backgroundColor: AppColors.white,
+        child: Text(
+          userName.substring(0, 1).toUpperCase(),
+          style: AppTextStyles.heading2.copyWith(color: AppColors.primary),
+        ),
+      ),
+      decoration: const BoxDecoration(color: AppColors.primary),
+    );
+  }
+
+  /// Builds the menu items section
+  Widget _buildMenuItems(BuildContext context) {
+    final menuItems = [
+      {
+        'icon': Icons.dashboard_outlined,
+        'title': 'Dashboard',
+        'route': '/dashboard',
+        'onTap': () {}, // Already on dashboard
+      },
+      {
+        'icon': Icons.settings_outlined,
+        'title': 'Pengaturan',
+        'route': '/settings',
+        'onTap': () {}, // TODO: Navigate to settings screen
+      },
+      {
+        'icon': Icons.star_outlined,
+        'title': 'Fitur PRO',
+        'route': '/pro-features',
+        'onTap': () {}, // TODO: Navigate to PRO features screen
+      },
+    ];
+
+    return Column(
+      children: menuItems.map((item) {
+        return _buildMenuItem(
+          context: context,
+          icon: item['icon'] as IconData,
+          title: item['title'] as String,
+          route: item['route'] as String,
+          onTap: item['onTap'] as VoidCallback,
+        );
+      }).toList(),
+    );
+  }
+
+  /// Builds the logout button section
+  Widget _buildLogoutButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            _showLogoutConfirmation(context);
+          },
+          child: Text(
+            'Keluar',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.red,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

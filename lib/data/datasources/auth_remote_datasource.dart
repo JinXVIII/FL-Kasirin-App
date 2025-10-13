@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
+import 'auth_local_datasource.dart';
 
 import '../../cores/constants/variables.dart';
 
@@ -19,6 +20,21 @@ class AuthRemoteDatasource {
     if (response.statusCode == 200) {
       print(response.body);
       return right(AuthResponseModel.fromJson(response.body));
+    } else {
+      print(response.body);
+      return left(response.body);
+    }
+  }
+
+  Future<Either<String, String>> logout() async {
+    final authData = await AuthLocalDatasource().getAuthData();
+    final response = await http.post(
+      Uri.parse('${Variables.baseUrl}/auth/logout'),
+      headers: {'Authorization': 'Bearer ${authData!.token}'},
+    );
+    if (response.statusCode == 200) {
+      print(response.body);
+      return right(response.body);
     } else {
       print(response.body);
       return left(response.body);
