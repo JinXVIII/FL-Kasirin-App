@@ -189,6 +189,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       value: _selectedCategory,
                       items: _categories,
                       label: "Kategori",
+                      hintText: "Pilih kategori",
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           setState(() {

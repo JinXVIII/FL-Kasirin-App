@@ -6,14 +6,20 @@ class CustomDropdown<T> extends StatelessWidget {
   final T? value;
   final List<T> items;
   final String label;
+  final String hintText;
+  final bool enabled;
   final Function(T? value)? onChanged;
+  final Widget Function(BuildContext context, T item)? itemBuilder;
 
   const CustomDropdown({
     super.key,
     required this.value,
     required this.items,
     required this.label,
+    required this.hintText,
+    this.enabled = true,
     this.onChanged,
+    this.itemBuilder,
   });
 
   @override
@@ -29,19 +35,21 @@ class CustomDropdown<T> extends StatelessWidget {
           child: DropdownButtonFormField<T>(
             isExpanded: true,
             hint: Text(
-              'Select $label',
+              hintText,
               style: AppTextStyles.caption.copyWith(fontSize: 14),
             ),
             initialValue: value,
-            onChanged: onChanged,
+            onChanged: enabled ? onChanged : null,
             items: items.map((T item) {
               return DropdownMenuItem<T>(
                 value: item,
-                child: Text(
-                  item.toString(),
-                  style: AppTextStyles.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: itemBuilder != null
+                    ? itemBuilder!(context, item)
+                    : Text(
+                        item.toString(),
+                        style: AppTextStyles.bodyMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
               );
             }).toList(),
             decoration: InputDecoration(
@@ -53,6 +61,8 @@ class CustomDropdown<T> extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey),
               ),
+              filled: !enabled,
+              fillColor: enabled ? null : Colors.grey.shade100,
             ),
           ),
         ),

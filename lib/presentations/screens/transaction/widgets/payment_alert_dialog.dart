@@ -190,6 +190,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       value: _selectedPaymentMethod,
                       items: _paymentMethods,
                       label: 'Metode Pembayaran',
+                      hintText: "Pilih metode pembayaran",
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
