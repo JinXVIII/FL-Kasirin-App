@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/routes/app_router.dart';
 import '../../../cores/themes/text_styles.dart';
+
+import '../../../data/models/product_model.dart';
+
+import '../../providers/product_provider.dart';
 
 import '../../widgets/custom_text_field.dart';
 import 'widgets/product_card.dart';
@@ -17,75 +22,23 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   late TextEditingController controller;
-  List<Map<String, dynamic>> filteredProducts = [];
-  String searchQuery = '';
-
-  // Sample product data
-  final List<Map<String, dynamic>> products = [
-    {
-      'id': 1,
-      'name': 'Kopi Hitam',
-      'price': 15000,
-      'stock': 50,
-      'category': 'Minuman',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-    {
-      'id': 2,
-      'name': 'Teh Manis',
-      'price': 10000,
-      'stock': 30,
-      'category': 'Minuman',
-    },
-    {
-      'id': 3,
-      'name': 'Nasi Goreng',
-      'price': 25000,
-      'stock': 20,
-      'category': 'Makanan',
-      // No imageUrl - will show food icon
-    },
-    {
-      'id': 4,
-      'name': 'Mie Ayam',
-      'price': 20000,
-      'stock': 15,
-      'category': 'Makanan',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-    {
-      'id': 5,
-      'name': 'Es Jeruk',
-      'price': 12000,
-      'stock': 25,
-      'category': 'Minuman',
-      // No imageUrl - will show food icon
-    },
-    {
-      'id': 6,
-      'name': 'Ayam Goreng',
-      'price': 22000,
-      'stock': 18,
-      'category': 'Makanan',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
     controller = TextEditingController();
-    filteredProducts = List.from(products);
 
     // Add listener to search controller
     controller.addListener(() {
-      setState(() {
-        searchQuery = controller.text.toLowerCase();
-        _filterProducts();
-      });
+      Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      ).filterProducts(controller.text);
+    });
+
+    // Load products when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).getAllProducts();
     });
   }
 
@@ -93,21 +46,6 @@ class _ProductScreenState extends State<ProductScreen> {
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  void _filterProducts() {
-    if (searchQuery.isEmpty) {
-      setState(() {
-        filteredProducts = List.from(products);
-      });
-    } else {
-      setState(() {
-        filteredProducts = products.where((product) {
-          return product['name'].toLowerCase().contains(searchQuery) ||
-              product['category'].toLowerCase().contains(searchQuery);
-        }).toList();
-      });
-    }
   }
 
   @override
@@ -124,6 +62,13 @@ class _ProductScreenState extends State<ProductScreen> {
             icon: const Icon(Icons.add),
             tooltip: 'Tambah Produk',
           ),
+          // IconButton(
+          //   onPressed: () {
+          //     Provider.of<ProductProvider>(context, listen: false).refresh();
+          //   },
+          //   icon: const Icon(Icons.refresh),
+          //   tooltip: 'Refresh',
+          // ),
         ],
       ),
       backgroundColor: AppColors.body,
@@ -142,16 +87,68 @@ class _ProductScreenState extends State<ProductScreen> {
             const SizedBox(height: 6),
 
             // Product count
-            Text(
-              'Menampilkan ${filteredProducts.length} produk',
-              style: AppTextStyles.caption,
+            Consumer<ProductProvider>(
+              builder: (context, provider, child) {
+                return Text(
+                  'Menampilkan ${provider.filteredProducts.length} produk',
+                  style: AppTextStyles.caption,
+                );
+              },
             ),
             const SizedBox(height: 8),
 
             // Product list
             Expanded(
-              child: filteredProducts.isEmpty
-                  ? Center(
+              child: Consumer<ProductProvider>(
+                builder: (context, provider, child) {
+                  // State: Loading
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // State: Error
+                  if (provider.error != null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Terjadi kesalahan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red[600],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            provider.error!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              provider.refresh();
+                            },
+                            child: const Text('Coba Lagi'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // State: Empty
+                  if (provider.filteredProducts.isEmpty) {
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -162,37 +159,89 @@ class _ProductScreenState extends State<ProductScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Tidak ada produk ditemukan',
+                            provider.products.isEmpty
+                                ? 'Belum ada produk'
+                                : 'Tidak ada produk ditemukan',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[600],
                             ),
                           ),
+                          if (provider.products.isEmpty) ...[
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.pushNamed(RouteConstants.addProduct);
+                              },
+                              child: const Text('Tambah Produk'),
+                            ),
+                          ],
                         ],
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = filteredProducts[index];
-                        return ProductCard(
-                          product: product,
-                          onEdit: () {
-                            context.pushNamed(
-                              RouteConstants.editProduct,
-                              pathParameters: {'id': product['id'].toString()},
-                            );
-                          },
-                          onDelete: () {
-                            // TODO: Implement delete product functionality
-                          },
-                        );
-                      },
-                    ),
+                    );
+                  }
+
+                  // State: Success
+                  return ListView.builder(
+                    itemCount: provider.filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final ProductModel product =
+                          provider.filteredProducts[index];
+                      return ProductCard(
+                        product: product,
+                        onEdit: () {
+                          context.pushNamed(
+                            RouteConstants.editProduct,
+                            pathParameters: {'id': product.id.toString()},
+                          );
+                        },
+                        onDelete: () {
+                          _showDeleteConfirmation(context, product);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, ProductModel product) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hapus Produk'),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus produk "${product.name}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Implement delete functionality
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Fitur hapus produk akan segera hadir'),
+                    backgroundColor: AppColors.grey,
+                  ),
+                );
+              },
+              child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

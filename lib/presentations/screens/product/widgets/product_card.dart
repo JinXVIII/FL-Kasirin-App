@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
 
+import '../../../../data/models/product_model.dart';
+
 class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final ProductModel product;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -48,9 +50,12 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.grey[200],
                 image: DecorationImage(
-                  image: product['imageUrl'] != null
-                      ? NetworkImage(product['imageUrl'])
-                      : const AssetImage('assets/images/no-image.png'),
+                  image:
+                      product.thumbnail != null &&
+                          product.thumbnail.toString().isNotEmpty
+                      ? NetworkImage(product.thumbnail.toString())
+                      : const AssetImage('assets/images/no-image.png')
+                            as ImageProvider,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -72,7 +77,7 @@ class ProductCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      product['category'] ?? 'Kategori tidak tersedia',
+                      product.productCategory.name,
                       style: AppTextStyles.whiteBodySmall.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -80,14 +85,20 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    product['name'],
+                    product.name,
                     style: AppTextStyles.heading4.copyWith(fontSize: 14),
                   ),
                   Text(
-                    product['price'] != null
-                        ? 'Rp ${product['price'].toString()}'
-                        : 'Harga tidak tersedia',
+                    'Rp ${product.sellingPrice}',
                     style: AppTextStyles.priceSmall,
+                  ),
+                  Text(
+                    'Stok: ${product.stock}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: product.stock == '0'
+                          ? AppColors.red
+                          : AppColors.grey,
+                    ),
                   ),
                 ],
               ),
