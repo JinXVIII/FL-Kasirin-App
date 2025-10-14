@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../cores/themes/text_styles.dart';
 
 import '../../../data/models/product_type_model.dart';
+import '../../../data/models/request/product_request_model.dart';
 
 import '../../providers/product_provider.dart';
 
@@ -29,7 +30,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _stockController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
-  ProductTypeModel? _selectedCategory, _selectedUnit;
+  ProductTypeModel? _selectedCategory;
+  ProductTypeModel? _selectedUnit;
+  XFile? _selectedImage;
 
   @override
   void initState() {
@@ -56,7 +59,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     super.dispose();
   }
 
-  void _saveProduct() {
+  void _saveProduct() async {
     if (_formKey.currentState!.validate()) {
       if (_selectedCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,18 +81,46 @@ class _AddProductScreenState extends State<AddProductScreen> {
         return;
       }
 
-      // TODO: Implement save product functionality with API
-      // For now, just show a success message and go back
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Produk berhasil ditambahkan dengan kategori ID: ${_selectedCategory!.id} dan unit ID: ${_selectedUnit!.id}',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      // Create product request model
+      final productRequest = ProductRequestModel(
+        name: _nameController.text,
+        productCategoryId: _selectedCategory!.id,
+        productUnitId: _selectedUnit!.id,
+        purchasePrice: int.parse(_priceBuyController.text),
+        sellingPrice: int.parse(_priceSellController.text),
+        stock: int.parse(_stockController.text),
+        thumbnail: _selectedImage,
       );
 
-      context.pop();
+      // Call add product API
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
+      final success = await productProvider.addProduct(productRequest);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Produk berhasil ditambahkan'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Gagal menambahkan produk: ${productProvider.addProductError}',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -111,6 +142,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
               ImagePickerWidget(
                 label: "Gambar Produk",
                 onChanged: (XFile? value) {
+                  setState(() {
+                    _selectedImage = value;
+                  });
                   if (value != null) {
                     _imageUrlController.text = value.path;
                   }
@@ -178,7 +212,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       value: null,
                       items: const [],
                       label: "Unit",
-                      hintText: "Memuat units...",
+                      hintText: "Memuat unit...",
                       enabled: false,
                     );
                   }
@@ -244,9 +278,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 24.0),
 
               // Save button
-              CustomButton.filled(
-                onPressed: _saveProduct,
-                label: "Simpan Produk",
+              Consumer<ProductProvider>(
+                builder: (context, provider, child) {
+                  return CustomButton.filled(
+                    onPressed: provider.isAddingProduct
+                        ? () {}
+                        : () => _saveProduct(),
+                    label: provider.isAddingProduct
+                        ? "Menyimpan..."
+                        : "Simpan Produk",
+                    disabled: provider.isAddingProduct,
+                  );
+                },
               ),
             ],
           ),

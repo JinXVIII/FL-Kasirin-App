@@ -4,19 +4,19 @@ import 'product_type_model.dart';
 
 class ProductModel {
   final int id;
-  final String userId;
-  final String productCategoryId;
-  final String productUnitId;
+  final int userId;
+  final int productCategoryId;
+  final int productUnitId;
   final String name;
   final dynamic thumbnail;
-  final String purchasePrice;
-  final String sellingPrice;
-  final String stock;
-  final String isActive;
+  final int purchasePrice;
+  final int sellingPrice;
+  final int stock;
+  final String? isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final ProductTypeModel productCategory;
-  final ProductTypeModel productUnit;
+  final ProductTypeModel? productCategory;
+  final ProductTypeModel? productUnit;
 
   ProductModel({
     required this.id,
@@ -28,11 +28,11 @@ class ProductModel {
     required this.purchasePrice,
     required this.sellingPrice,
     required this.stock,
-    required this.isActive,
+    this.isActive,
     required this.createdAt,
     required this.updatedAt,
-    required this.productCategory,
-    required this.productUnit,
+    this.productCategory,
+    this.productUnit,
   });
 
   factory ProductModel.fromJson(String str) =>
@@ -53,8 +53,12 @@ class ProductModel {
     isActive: json["is_active"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
-    productCategory: ProductTypeModel.fromMap(json["product_category"]),
-    productUnit: ProductTypeModel.fromMap(json["product_unit"]),
+    productCategory: json["product_category"] != null
+        ? ProductTypeModel.fromMap(json["product_category"])
+        : null,
+    productUnit: json["product_unit"] != null
+        ? ProductTypeModel.fromMap(json["product_unit"])
+        : null,
   );
 
   Map<String, dynamic> toMap() => {
@@ -70,7 +74,7 @@ class ProductModel {
     "is_active": isActive,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
-    "product_category": productCategory.toMap(),
-    "product_unit": productUnit.toMap(),
+    "product_category": productCategory?.toMap(),
+    "product_unit": productUnit?.toMap(),
   };
 }

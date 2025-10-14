@@ -26,3 +26,23 @@ class ProductResponseModel {
     "data": List<dynamic>.from(data.map((x) => x.toMap())),
   };
 }
+
+class AddProductResponseModel {
+  final String message;
+  final ProductModel data;
+
+  AddProductResponseModel({required this.message, required this.data});
+
+  factory AddProductResponseModel.fromJson(String str) =>
+      AddProductResponseModel.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory AddProductResponseModel.fromMap(Map<String, dynamic> json) =>
+      AddProductResponseModel(
+        message: json["message"],
+        data: ProductModel.fromMap(json["data"]),
+      );
+
+  Map<String, dynamic> toMap() => {"message": message, "data": data.toMap()};
+}

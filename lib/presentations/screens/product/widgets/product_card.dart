@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/constants/variables.dart';
 import '../../../../cores/themes/text_styles.dart';
 
 import '../../../../data/models/product_model.dart';
@@ -53,7 +54,9 @@ class ProductCard extends StatelessWidget {
                   image:
                       product.thumbnail != null &&
                           product.thumbnail.toString().isNotEmpty
-                      ? NetworkImage(product.thumbnail.toString())
+                      ? NetworkImage(
+                          '${Variables.baseUrlImage}/${product.thumbnail}',
+                        )
                       : const AssetImage('assets/images/no-image.png')
                             as ImageProvider,
                   fit: BoxFit.cover,
@@ -77,7 +80,7 @@ class ProductCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      product.productCategory.name,
+                      product.productCategory!.name,
                       style: AppTextStyles.whiteBodySmall.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,

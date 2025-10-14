@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import '../../data/datasources/product_remote_datasource.dart';
 import '../../data/models/product_model.dart';
 import '../../data/models/product_type_model.dart';
+import '../../data/models/request/product_request_model.dart';
 import '../../data/models/response/product_response_model.dart';
 import '../../data/models/response/product_type_response_model.dart';
 
@@ -17,6 +18,10 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel> _filteredProducts = [];
   bool _isLoading = false;
   String? _error;
+
+  // Add product states
+  bool _isAddingProduct = false;
+  String? _addProductError;
 
   // Category states
   List<ProductTypeModel> _categories = [];
@@ -33,6 +38,10 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel> get filteredProducts => _filteredProducts;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // Add product getters
+  bool get isAddingProduct => _isAddingProduct;
+  String? get addProductError => _addProductError;
 
   // Category getters
   List<ProductTypeModel> get categories => _categories;
@@ -61,6 +70,28 @@ class ProductProvider extends ChangeNotifier {
         _products = response.data;
         _filteredProducts = List.from(_products);
         _setLoading(false);
+      },
+    );
+  }
+
+  // Add product method
+  Future<bool> addProduct(ProductRequestModel productRequest) async {
+    _setAddingProduct(true);
+    _addProductError = null;
+
+    final Either<String, AddProductResponseModel> result =
+        await _remoteDatasource.addProduct(productRequest);
+
+    return result.fold(
+      (error) {
+        _addProductError = error;
+        _setAddingProduct(false);
+        return false;
+      },
+      (response) {
+        _setAddingProduct(false);
+        getAllProducts();
+        return true;
       },
     );
   }
@@ -116,7 +147,7 @@ class ProductProvider extends ChangeNotifier {
     } else {
       _filteredProducts = _products.where((product) {
         return product.name.toLowerCase().contains(query.toLowerCase()) ||
-            product.productCategory.name.toLowerCase().contains(
+            product.productCategory!.name.toLowerCase().contains(
               query.toLowerCase(),
             );
       }).toList();
@@ -126,6 +157,11 @@ class ProductProvider extends ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setAddingProduct(bool value) {
+    _isAddingProduct = value;
     notifyListeners();
   }
 

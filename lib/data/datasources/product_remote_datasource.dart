@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../cores/constants/variables.dart';
 
+import '../models/request/product_request_model.dart';
 import '../models/response/product_type_response_model.dart';
 import '../models/response/product_response_model.dart';
 
@@ -71,6 +72,47 @@ class ProductRemoteDatasource {
     } else {
       debugPrint('Error response: ${response.body}');
       return const Left('Terjadi kesalahan saat mengambil data produk');
+    }
+  }
+
+  Future<Either<String, AddProductResponseModel>> addProduct(
+    ProductRequestModel productRequestModel,
+  ) async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final Map<String, String> headers = {
+      'Authorization': 'Bearer ${authData?.token}',
+      'Accept': 'application/json',
+    };
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('${Variables.baseUrl}/products'),
+    );
+
+    request.fields.addAll(productRequestModel.toMap());
+
+    // Add thumbnail if provided (optional)
+    if (productRequestModel.thumbnail != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'thumbnail',
+          productRequestModel.thumbnail!.path,
+        ),
+      );
+    }
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    final String body = await response.stream.bytesToString();
+    debugPrint("Response body: $body");
+
+    if (response.statusCode == 201) {
+      return right(AddProductResponseModel.fromJson(body));
+    } else {
+      return left(body);
     }
   }
 }
