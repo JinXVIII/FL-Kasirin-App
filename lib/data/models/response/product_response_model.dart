@@ -46,3 +46,43 @@ class AddProductResponseModel {
 
   Map<String, dynamic> toMap() => {"message": message, "data": data.toMap()};
 }
+
+class DetailProductResponseModel {
+  final String message;
+  final ProductModel data;
+
+  DetailProductResponseModel({required this.message, required this.data});
+
+  factory DetailProductResponseModel.fromJson(String str) =>
+      DetailProductResponseModel.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory DetailProductResponseModel.fromMap(Map<String, dynamic> json) =>
+      DetailProductResponseModel(
+        message: json["message"],
+        data: ProductModel.fromMap(json["data"]),
+      );
+
+  Map<String, dynamic> toMap() => {"message": message, "data": data.toMap()};
+}
+
+class EditProductResponseModel {
+  final String message;
+  final ProductModel data;
+
+  EditProductResponseModel({required this.message, required this.data});
+
+  factory EditProductResponseModel.fromJson(String str) =>
+      EditProductResponseModel.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory EditProductResponseModel.fromMap(Map<String, dynamic> json) =>
+      EditProductResponseModel(
+        message: json["message"],
+        data: ProductModel.fromMap(json["data"]),
+      );
+
+  Map<String, dynamic> toMap() => {"message": message, "data": data.toMap()};
+}

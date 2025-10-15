@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../data/datasources/product_remote_datasource.dart';
+
 import '../../data/models/product_model.dart';
 import '../../data/models/product_type_model.dart';
 import '../../data/models/request/product_request_model.dart';
@@ -23,6 +24,15 @@ class ProductProvider extends ChangeNotifier {
   bool _isAddingProduct = false;
   String? _addProductError;
 
+  // Detail product states
+  bool _isLoadingDetailProduct = false;
+  String? _detailProductError;
+  ProductModel? _detailProduct;
+
+  // Edit product states
+  bool _isEditingProduct = false;
+  String? _editProductError;
+
   // Category states
   List<ProductTypeModel> _categories = [];
   bool _isLoadingCategories = false;
@@ -42,6 +52,15 @@ class ProductProvider extends ChangeNotifier {
   // Add product getters
   bool get isAddingProduct => _isAddingProduct;
   String? get addProductError => _addProductError;
+
+  // Detail product getters
+  bool get isLoadingDetailProduct => _isLoadingDetailProduct;
+  String? get detailProductError => _detailProductError;
+  ProductModel? get detailProduct => _detailProduct;
+
+  // Edit product getters
+  bool get isEditingProduct => _isEditingProduct;
+  String? get editProductError => _editProductError;
 
   // Category getters
   List<ProductTypeModel> get categories => _categories;
@@ -90,6 +109,53 @@ class ProductProvider extends ChangeNotifier {
       },
       (response) {
         _setAddingProduct(false);
+        getAllProducts();
+        return true;
+      },
+    );
+  }
+
+  // Get product by ID method
+  Future<bool> getProductById(int productId) async {
+    _setLoadingDetailProduct(true);
+    _detailProductError = null;
+
+    final Either<String, DetailProductResponseModel> result =
+        await _remoteDatasource.getProductById(productId);
+
+    return result.fold(
+      (error) {
+        _detailProductError = error;
+        _setLoadingDetailProduct(false);
+        return false;
+      },
+      (response) {
+        _detailProduct = response.data;
+        _setLoadingDetailProduct(false);
+        return true;
+      },
+    );
+  }
+
+  // Edit product method
+  Future<bool> editProduct(
+    ProductRequestModel productRequest,
+    int productId,
+  ) async {
+    _setEditingProduct(true);
+    _editProductError = null;
+
+    final Either<String, EditProductResponseModel> result =
+        await _remoteDatasource.editProduct(productRequest, productId);
+
+    return result.fold(
+      (error) {
+        _editProductError = error;
+        _setEditingProduct(false);
+        return false;
+      },
+      (response) {
+        _setEditingProduct(false);
         getAllProducts();
         return true;
       },
@@ -155,6 +221,7 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Set loading states
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -163,6 +230,16 @@ class ProductProvider extends ChangeNotifier {
   void _setAddingProduct(bool value) {
     _isAddingProduct = value;
     notifyListeners();
+  }
+
+  void _setLoadingDetailProduct(bool value) {
+    _isLoadingDetailProduct = value;
+    _safeNotifyListeners();
+  }
+
+  void _setEditingProduct(bool value) {
+    _isEditingProduct = value;
+    _safeNotifyListeners();
   }
 
   void _setLoadingCategories(bool value) {
@@ -175,15 +252,14 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void refresh() {
-    getAllProducts();
+  void _safeNotifyListeners() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
-  void refreshCategories() {
-    getAllCategories();
-  }
-
-  void refreshUnits() {
-    getAllUnits();
-  }
+  // Refresh methods
+  void refresh() => getAllProducts();
+  void refreshCategories() => getAllCategories();
+  void refreshUnits() => getAllUnits();
 }

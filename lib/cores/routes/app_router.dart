@@ -116,7 +116,7 @@ class AppRouter {
                 name: RouteConstants.editProduct,
                 path: RouteConstants.editProductPath,
                 builder: (context, state) {
-                  final productId = state.pathParameters['id']!;
+                  final productId = int.parse(state.pathParameters['id']!);
                   return EditProductScreen(productId: productId);
                 },
               ),
