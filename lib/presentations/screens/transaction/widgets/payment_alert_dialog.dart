@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
+
+import '../../../../data/models/request/transaction_request_model.dart';
+
+import '../../../providers/cart_provider.dart';
+import '../../../providers/transaction_provider.dart';
 
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_dropdown.dart';
@@ -10,11 +16,13 @@ import '../../../widgets/custom_text_field.dart';
 class PaymentAlertDialog extends StatefulWidget {
   final int totalPrice;
   final Function() onPaymentSuccess;
+  final String? buyerName;
 
   const PaymentAlertDialog({
     super.key,
     required this.totalPrice,
     required this.onPaymentSuccess,
+    this.buyerName,
   });
 
   @override
@@ -23,6 +31,8 @@ class PaymentAlertDialog extends StatefulWidget {
 
 class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   final TextEditingController _paymentController = TextEditingController();
+  final TextEditingController _buyerController = TextEditingController();
+
   String _selectedPaymentMethod = 'Tunai';
   final List<String> _paymentMethods = [
     'Tunai',
@@ -39,6 +49,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   void initState() {
     super.initState();
     _paymentController.text = widget.totalPrice.toString();
+    _buyerController.text = widget.buyerName ?? '';
     _calculateQuickAmounts();
     _setInitialSelectedAmount();
     _calculateChange();
@@ -47,6 +58,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   @override
   void dispose() {
     _paymentController.dispose();
+    _buyerController.dispose();
     super.dispose();
   }
 
@@ -99,21 +111,67 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     });
   }
 
-  void _processPayment(BuildContext context) {
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _processPayment() async {
     final paymentAmount = int.tryParse(_paymentController.text) ?? 0;
 
     if (paymentAmount < widget.totalPrice) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Jumlah pembayaran kurang dari total pembayaran'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar('Jumlah pembayaran kurang dari total pembayaran');
       return;
     }
 
-    Navigator.pop(context);
-    widget.onPaymentSuccess();
+    // Get providers once before async operation
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final transactionProvider = Provider.of<TransactionProvider>(
+      context,
+      listen: false,
+    );
+
+    // Create transaction items from cart items
+    final transactionItems = cartProvider.cartItems
+        .map(
+          (cartItem) => TransactionItem(
+            productId: cartItem.product.id,
+            quantity: cartItem.quantity,
+            price: cartItem.product.sellingPrice,
+            subtotal: cartItem.product.sellingPrice * cartItem.quantity,
+          ),
+        )
+        .toList();
+
+    // Create transaction request
+    final transactionRequest = TransactionRequestModel(
+      buyer: _buyerController.text.isNotEmpty ? _buyerController.text : null,
+      paymentMethod: _selectedPaymentMethod,
+      totalPrice: widget.totalPrice,
+      paidAmount: paymentAmount,
+      changeAmount: _changeAmount,
+      items: transactionItems,
+    );
+
+    // Process transaction
+    final success = await transactionProvider.createTransaction(
+      transactionRequest,
+    );
+
+    if (mounted) {
+      if (success) {
+        Navigator.pop(context);
+        widget.onPaymentSuccess();
+      } else {
+        _showErrorSnackBar(
+          transactionProvider.transactionError ??
+              'Terjadi kesalahan saat memproses pembayaran',
+        );
+      }
+    }
   }
 
   @override
@@ -184,6 +242,13 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       ],
                     ),
                     const SizedBox(height: 12),
+
+                    // Buyer name (optional)
+                    CustomTextField(
+                      controller: _buyerController,
+                      label: 'Nama Pembeli (Opsional)',
+                    ),
+                    const SizedBox(height: 16),
 
                     // Payment method
                     CustomDropdown(
@@ -311,9 +376,17 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             // Action buttons
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: CustomButton.filled(
-                onPressed: () => _processPayment(context),
-                label: "Bayar",
+              child: Consumer<TransactionProvider>(
+                builder: (context, transactionProvider, child) {
+                  return CustomButton.filled(
+                    onPressed: transactionProvider.isProcessingTransaction
+                        ? () {}
+                        : _processPayment,
+                    label: transactionProvider.isProcessingTransaction
+                        ? "Memproses..."
+                        : "Bayar",
+                  );
+                },
               ),
             ),
           ],
