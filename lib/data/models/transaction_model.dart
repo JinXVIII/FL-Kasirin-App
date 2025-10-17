@@ -1,26 +1,26 @@
 import 'dart:convert';
 
 class TransactionModel {
-  final int userId;
+  final int? userId;
   final String invoiceNumber;
   final String? buyer;
   final String paymentMethod;
   final int totalPrice;
   final int paidAmount;
   final int changeAmount;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
   final DateTime createdAt;
   final int id;
 
   TransactionModel({
-    required this.userId,
+    this.userId,
     required this.invoiceNumber,
     this.buyer,
     required this.paymentMethod,
     required this.totalPrice,
     required this.paidAmount,
     required this.changeAmount,
-    required this.updatedAt,
+    this.updatedAt,
     required this.createdAt,
     required this.id,
   });
@@ -39,7 +39,9 @@ class TransactionModel {
         totalPrice: json["total_price"],
         paidAmount: json["paid_amount"],
         changeAmount: json["change_amount"],
-        updatedAt: DateTime.parse(json["updated_at"]),
+        updatedAt: json["updated_at"] != null
+            ? DateTime.parse(json["updated_at"])
+            : null,
         createdAt: DateTime.parse(json["created_at"]),
         id: json["id"],
       );
@@ -52,7 +54,7 @@ class TransactionModel {
     "total_price": totalPrice,
     "paid_amount": paidAmount,
     "change_amount": changeAmount,
-    "updated_at": updatedAt.toIso8601String(),
+    "updated_at": updatedAt?.toIso8601String(),
     "created_at": createdAt.toIso8601String(),
     "id": id,
   };

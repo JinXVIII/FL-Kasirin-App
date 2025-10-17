@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 import '../../../data/models/product_model.dart';
-import '../../../data/datasources/transaction_remote_datasource.dart';
-
 import '../../providers/cart_provider.dart';
 import '../../providers/transaction_provider.dart';
 
@@ -132,21 +130,22 @@ class CheckoutScreen extends StatelessWidget {
   void _showPaymentDialog(BuildContext context, CartProvider cartProvider) {
     showDialog(
       context: context,
-      builder: (context) => ChangeNotifierProvider(
-        create: (context) => TransactionProvider(TransactionRemoteDatasource()),
-        child: PaymentAlertDialog(
-          totalPrice: cartProvider.totalPrice,
-          onPaymentSuccess: () {
-            cartProvider.clearCart();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Pembayaran berhasil'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            context.pop();
-          },
-        ),
+      builder: (context) => Consumer<TransactionProvider>(
+        builder: (context, transactionProvider, child) {
+          return PaymentAlertDialog(
+            totalPrice: cartProvider.totalPrice,
+            onPaymentSuccess: () {
+              cartProvider.clearCart();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Pembayaran berhasil'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              context.pop();
+            },
+          );
+        },
       ),
     );
   }

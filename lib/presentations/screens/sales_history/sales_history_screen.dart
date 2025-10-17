@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
+
+import '../../providers/transaction_provider.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
@@ -18,10 +21,8 @@ class SalesHistoryScreen extends StatefulWidget {
 class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
   late TextEditingController _startDateController;
   late TextEditingController _endDateController;
-
-  // Dummy data for sales history
-  List<Map<String, dynamic>> _allSalesData = [];
-  List<Map<String, dynamic>> _filteredSalesData = [];
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -32,12 +33,12 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     // Set default dates to current month
     _setDefaultDates();
 
-    // Generate dummy data
-    _generateDummyData();
+    // Setup scroll controller for pagination
+    _scrollController.addListener(_scrollListener);
 
-    // Apply initial filter after the widget is built
+    // Load initial data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _applyFilters();
+      _loadTransactionHistory(refresh: true);
     });
   }
 
@@ -51,96 +52,68 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     _endDateController.text = DateFormat('yyyy-MM-dd').format(now);
   }
 
-  void _generateDummyData() {
-    _allSalesData = [
-      {
-        'id': 1,
-        'transactionNumber': 'TRX-20250901-001',
-        'transactionDate': DateTime(2025, 9, 1, 10, 30),
-        'totalAmount': 45000,
-        'paymentMethod': 'Tunai',
-        'items': [
-          {'productName': 'Kopi Hitam', 'quantity': 2, 'price': 15000},
-          {'productName': 'Teh Manis', 'quantity': 1, 'price': 10000},
-          {'productName': 'Nasi Goreng', 'quantity': 1, 'price': 25000},
-        ],
-      },
-      {
-        'id': 2,
-        'transactionNumber': 'TRX-20250902-001',
-        'transactionDate': DateTime(2025, 9, 2, 14, 15),
-        'totalAmount': 32000,
-        'paymentMethod': 'E-Wallet',
-        'items': [
-          {'productName': 'Mie Ayam', 'quantity': 1, 'price': 20000},
-          {'productName': 'Es Jeruk', 'quantity': 1, 'price': 12000},
-        ],
-      },
-      {
-        'id': 3,
-        'transactionNumber': 'TRX-20250905-001',
-        'transactionDate': DateTime(2025, 9, 5, 9, 45),
-        'totalAmount': 67000,
-        'paymentMethod': 'Kartu Kredit',
-        'items': [
-          {'productName': 'Ayam Goreng', 'quantity': 2, 'price': 22000},
-          {'productName': 'Kopi Hitam', 'quantity': 1, 'price': 15000},
-          {'productName': 'Teh Manis', 'quantity': 2, 'price': 10000},
-        ],
-      },
-      {
-        'id': 4,
-        'transactionNumber': 'TRX-20250910-001',
-        'transactionDate': DateTime(2025, 9, 10, 12, 20),
-        'totalAmount': 25000,
-        'paymentMethod': 'Tunai',
-        'items': [
-          {'productName': 'Nasi Goreng', 'quantity': 1, 'price': 25000},
-        ],
-      },
-      {
-        'id': 5,
-        'transactionNumber': 'TRX-20250915-001',
-        'transactionDate': DateTime(2025, 9, 15, 16, 30),
-        'totalAmount': 54000,
-        'paymentMethod': 'Transfer Bank',
-        'items': [
-          {'productName': 'Mie Ayam', 'quantity': 2, 'price': 20000},
-          {'productName': 'Es Jeruk', 'quantity': 1, 'price': 12000},
-          {'productName': 'Kopi Hitam', 'quantity': 1, 'price': 15000},
-        ],
-      },
-      {
-        'id': 6,
-        'transactionNumber': 'TRX-20230920-001',
-        'transactionDate': DateTime(2025, 9, 20, 11, 10),
-        'totalAmount': 37000,
-        'paymentMethod': 'Tunai',
-        'items': [
-          {'productName': 'Ayam Goreng', 'quantity': 1, 'price': 22000},
-          {'productName': 'Teh Manis', 'quantity': 1, 'price': 10000},
-          {'productName': 'Es Jeruk', 'quantity': 1, 'price': 12000},
-        ],
-      },
-      {
-        'id': 7,
-        'transactionNumber': 'TRX-20230921-001',
-        'transactionDate': DateTime.now(),
-        'totalAmount': 42000,
-        'paymentMethod': 'E-Wallet',
-        'items': [
-          {'productName': 'Nasi Goreng', 'quantity': 1, 'price': 25000},
-          {'productName': 'Kopi Hitam', 'quantity': 1, 'price': 15000},
-        ],
-      },
-    ];
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore) {
+      _loadMoreTransactions();
+    }
   }
 
   @override
   void dispose() {
     _startDateController.dispose();
     _endDateController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTransactionHistory({bool refresh = false}) async {
+    final transactionProvider = Provider.of<TransactionProvider>(
+      context,
+      listen: false,
+    );
+
+    final success = await transactionProvider.getTransactionHistory(
+      startDate: _startDateController.text,
+      endDate: _endDateController.text,
+      page: 1,
+      refresh: refresh,
+    );
+
+    if (mounted && !success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            transactionProvider.historyError ??
+                'Gagal memuat riwayat transaksi',
+          ),
+          backgroundColor: AppColors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadMoreTransactions() async {
+    if (_isLoadingMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    final transactionProvider = Provider.of<TransactionProvider>(
+      context,
+      listen: false,
+    );
+
+    await transactionProvider.loadMoreTransactions(
+      startDate: _startDateController.text,
+      endDate: _endDateController.text,
+    );
+
+    setState(() {
+      _isLoadingMore = false;
+    });
   }
 
   Future<void> _selectStartDate(BuildContext context) async {
@@ -216,30 +189,23 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
   }
 
   void _applyFilters() {
-    final startDate = DateFormat('yyyy-MM-dd').parse(_startDateController.text);
-    final endDate = DateFormat('yyyy-MM-dd').parse(_endDateController.text);
-
-    setState(() {
-      _filteredSalesData = _allSalesData.where((sales) {
-        final transactionDate = sales['transactionDate'] as DateTime;
-        return transactionDate.isAfter(
-              startDate.subtract(const Duration(days: 1)),
-            ) &&
-            transactionDate.isBefore(endDate.add(const Duration(days: 1)));
-      }).toList();
-    });
+    _loadTransactionHistory(refresh: true);
 
     // Show snackbar with filter info
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Filter diterapkan: ${_startDateController.text} hingga ${_endDateController.text}. Ditemukan ${_filteredSalesData.length} transaksi.',
+            'Filter diterapkan: ${_startDateController.text} hingga ${_endDateController.text}',
           ),
           backgroundColor: Colors.green,
         ),
       );
     }
+  }
+
+  Future<void> _refresh() async {
+    await _loadTransactionHistory(refresh: true);
   }
 
   @override
@@ -318,42 +284,110 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                         'Daftar Penjualan',
                         style: AppTextStyles.heading4,
                       ),
-                      Text(
-                        '${_filteredSalesData.length} transaksi',
-                        style: AppTextStyles.caption,
+                      Consumer<TransactionProvider>(
+                        builder: (context, provider, child) {
+                          return Text(
+                            '${provider.allTransactions.length} transaksi',
+                            style: AppTextStyles.caption,
+                          );
+                        },
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
 
                   // Sales history list
-                  _filteredSalesData.isEmpty
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 64,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 16),
-                              Text(
-                                'Tidak ada data penjualan',
-                                style: AppTextStyles.heading4,
-                              ),
-                            ],
-                          ),
-                        )
-                      : Expanded(
+                  Expanded(
+                    child: Consumer<TransactionProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.isLoadingHistory &&
+                            provider.allTransactions.isEmpty) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (provider.historyError != null &&
+                            provider.allTransactions.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Terjadi kesalahan',
+                                  style: AppTextStyles.heading4,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  provider.historyError!,
+                                  style: AppTextStyles.bodyMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                CustomButton.filled(
+                                  onPressed: _refresh,
+                                  label: "Coba Lagi",
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        if (provider.allTransactions.isEmpty) {
+                          return const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 64,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Tidak ada data penjualan',
+                                  style: AppTextStyles.heading4,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return RefreshIndicator(
+                          onRefresh: _refresh,
                           child: ListView.builder(
-                            itemCount: _filteredSalesData.length,
+                            controller: _scrollController,
+                            itemCount:
+                                provider.allTransactions.length +
+                                (_isLoadingMore ? 1 : 0),
                             itemBuilder: (context, index) {
-                              final salesData = _filteredSalesData[index];
-                              return SalesHistoryItemCard(salesData: salesData);
+                              // Show loading indicator at the bottom
+                              if (index == provider.allTransactions.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              final transaction =
+                                  provider.allTransactions[index];
+                              return SalesHistoryItemCard(
+                                transaction: transaction,
+                              );
                             },
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -48,4 +48,52 @@ class TransactionRemoteDatasource {
       return Left(response.body);
     }
   }
+
+  Future<Either<String, HistoryTransactionResponseModel>>
+  getTransactionHistory({
+    String? startDate,
+    String? endDate,
+    int page = 1,
+  }) async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    // Build query parameters
+    Map<String, String> queryParams = {'page': page.toString()};
+    if (startDate != null) queryParams['startdate'] = startDate;
+    if (endDate != null) queryParams['enddate'] = endDate;
+
+    // Create URI with query parameters
+    final uri = Uri.parse(
+      '${Variables.baseUrl}/transactions',
+    ).replace(queryParameters: queryParams);
+
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      debugPrint('Transaction history retrieved successfully');
+      try {
+        final historyResponse = HistoryTransactionResponseModel.fromJson(
+          response.body,
+        );
+        debugPrint('Total transactions: ${historyResponse.data.total}');
+        debugPrint('Current page: ${historyResponse.data.currentPage}');
+        debugPrint('Has more: ${historyResponse.data.hasMore}');
+        return Right(historyResponse);
+      } catch (e) {
+        debugPrint('Error parsing response: $e');
+        return Left('Error parsing response: $e');
+      }
+    } else {
+      return Left(response.body);
+    }
+  }
 }

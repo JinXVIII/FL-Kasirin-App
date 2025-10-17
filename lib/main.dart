@@ -5,10 +5,12 @@ import 'package:provider/provider.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/auth_local_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
+import 'data/datasources/transaction_remote_datasource.dart';
 
 import 'presentations/providers/auth_provider.dart';
 import 'presentations/providers/cart_provider.dart';
 import 'presentations/providers/product_provider.dart';
+import 'presentations/providers/transaction_provider.dart';
 
 import 'cores/routes/app_router.dart';
 
@@ -34,6 +36,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(
           create: (context) => ProductProvider(ProductRemoteDatasource()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              TransactionProvider(TransactionRemoteDatasource()),
         ),
       ],
       child: Builder(
