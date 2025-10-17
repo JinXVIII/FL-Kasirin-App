@@ -212,10 +212,15 @@ class ProductProvider extends ChangeNotifier {
       _filteredProducts = List.from(_products);
     } else {
       _filteredProducts = _products.where((product) {
-        return product.name.toLowerCase().contains(query.toLowerCase()) ||
-            product.productCategory!.name.toLowerCase().contains(
+        final nameMatch = product.name.toLowerCase().contains(
+          query.toLowerCase(),
+        );
+        final categoryMatch =
+            product.productCategory?.name.toLowerCase().contains(
               query.toLowerCase(),
-            );
+            ) ??
+            false;
+        return nameMatch || categoryMatch;
       }).toList();
     }
     notifyListeners();

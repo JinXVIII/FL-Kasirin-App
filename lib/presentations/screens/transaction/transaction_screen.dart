@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/cart_provider.dart';
+import '../../providers/product_provider.dart';
+
+import '../../../data/models/product_model.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
@@ -20,83 +23,31 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> _filteredProducts = [];
-  String _searchQuery = '';
-
-  // Sample product data
-  final List<Map<String, dynamic>> _products = [
-    {
-      'id': 1,
-      'name': 'Kopi Hitam',
-      'price': 15000,
-      'stock': 50,
-      'category': 'Minuman',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-    {
-      'id': 2,
-      'name': 'Teh Manis',
-      'price': 10000,
-      'stock': 30,
-      'category': 'Minuman',
-    },
-    {
-      'id': 3,
-      'name': 'Nasi Goreng',
-      'price': 25000,
-      'stock': 20,
-      'category': 'Makanan',
-    },
-    {
-      'id': 4,
-      'name': 'Mie Ayam',
-      'price': 20000,
-      'stock': 15,
-      'category': 'Makanan',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-    {
-      'id': 5,
-      'name': 'Es Jeruk',
-      'price': 12000,
-      'stock': 25,
-      'category': 'Minuman',
-    },
-    {
-      'id': 6,
-      'name': 'Ayam Goreng',
-      'price': 22000,
-      'stock': 18,
-      'category': 'Makanan',
-      'imageUrl':
-          'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    },
-  ];
+  late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
-    _filteredProducts = List.from(_products);
-    _searchController.addListener(_filterProducts);
+    _searchController = TextEditingController();
+
+    // Add listener to search controller
+    _searchController.addListener(() {
+      Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      ).filterProducts(_searchController.text);
+    });
+
+    // Load products when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _filterProducts() {
-    setState(() {
-      _searchQuery = _searchController.text.toLowerCase();
-      _filteredProducts = _products.where((product) {
-        return product['name'].toLowerCase().contains(_searchQuery) ||
-            product['category'].toLowerCase().contains(_searchQuery);
-      }).toList();
-    });
   }
 
   @override
@@ -120,48 +71,130 @@ class _TransactionScreenState extends State<TransactionScreen> {
             ),
           ),
 
+          // Product count
+          Consumer<ProductProvider>(
+            builder: (context, provider, child) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Text(
+                    'Menampilkan ${provider.filteredProducts.length} produk',
+                    textAlign: TextAlign.left,
+                    style: AppTextStyles.caption,
+                  ),
+                ),
+              );
+            },
+          ),
+
           // Products grid
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Consumer<CartProvider>(
-                builder: (context, cartProvider, child) {
-                  return _filteredProducts.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Tidak ada produk ditemukan',
-                            style: AppTextStyles.bodyMedium,
+              child: Consumer2<ProductProvider, CartProvider>(
+                builder: (context, productProvider, cartProvider, child) {
+                  // State: Loading
+                  if (productProvider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // State: Error
+                  if (productProvider.error != null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red[400],
                           ),
-                        )
-                      : GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.75,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                              ),
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          itemCount: _filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = _filteredProducts[index];
-                            return ProductCard(
-                              product: product,
-                              quantity: cartProvider.getProductQuantity(
-                                product['id'],
-                              ),
-                              onAddToCart: () {
-                                cartProvider.addToCart(product);
-                              },
-                              onIncreaseQuantity: () {
-                                cartProvider.increaseQuantity(product['id']);
-                              },
-                              onDecreaseQuantity: () {
-                                cartProvider.decreaseQuantity(product['id']);
-                              },
-                            );
-                          },
-                        );
+                          const SizedBox(height: 16),
+                          Text(
+                            'Terjadi kesalahan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red[600],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            productProvider.error!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              productProvider.refresh();
+                            },
+                            child: const Text('Coba Lagi'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // State: Empty
+                  if (productProvider.filteredProducts.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            productProvider.products.isEmpty
+                                ? 'Belum ada produk'
+                                : 'Tidak ada produk ditemukan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // State: Success
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.75,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: productProvider.filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final ProductModel product =
+                          productProvider.filteredProducts[index];
+
+                      return ProductCard(
+                        product: product,
+                        quantity: cartProvider.getProductQuantity(product.id),
+                        onAddToCart: () {
+                          cartProvider.addToCart(product);
+                        },
+                        onIncreaseQuantity: () {
+                          cartProvider.increaseQuantity(product.id);
+                        },
+                        onDecreaseQuantity: () {
+                          cartProvider.decreaseQuantity(product.id);
+                        },
+                      );
+                    },
+                  );
                 },
               ),
             ),

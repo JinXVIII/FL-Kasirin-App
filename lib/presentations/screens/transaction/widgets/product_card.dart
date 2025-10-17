@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/constants/variables.dart';
 import '../../../../cores/themes/text_styles.dart';
 
+import '../../../../data/models/product_model.dart';
+
 class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final ProductModel product;
   final int quantity;
   final VoidCallback onAddToCart;
   final VoidCallback onIncreaseQuantity;
@@ -38,9 +41,7 @@ class ProductCard extends StatelessWidget {
                 ),
                 color: Colors.grey[200],
                 image: DecorationImage(
-                  image: product['imageUrl'] != null
-                      ? NetworkImage(product['imageUrl'])
-                      : const AssetImage('assets/images/no-image.png'),
+                  image: _getImageProvider(),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -54,17 +55,18 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name'],
-                  style: AppTextStyles.heading4.copyWith(fontSize: 12),
+                  product.name,
+                  style: AppTextStyles.heading4.copyWith(fontSize: 14),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2.0),
+
                 Text(
-                  'Rp ${product['price'].toString()}',
+                  'Rp ${product.sellingPrice.toString()}',
                   style: AppTextStyles.priceSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 // Quantity controls or add button
                 quantity == 0
@@ -141,5 +143,15 @@ class ProductCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  ImageProvider _getImageProvider() {
+    final imageUrl = product.thumbnail;
+
+    if (imageUrl != null && imageUrl.toString().isNotEmpty) {
+      return NetworkImage('${Variables.baseUrlImage}/$imageUrl');
+    } else {
+      return const AssetImage('assets/images/no-image.png');
+    }
   }
 }

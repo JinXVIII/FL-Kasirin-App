@@ -2,18 +2,23 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/models/product_model.dart';
+
 class CartItem {
-  final Map<String, dynamic> product;
+  final ProductModel product;
   int quantity;
 
   CartItem({required this.product, required this.quantity});
 
   Map<String, dynamic> toJson() {
-    return {'product': product, 'quantity': quantity};
+    return {'product': product.toMap(), 'quantity': quantity};
   }
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(product: json['product'], quantity: json['quantity']);
+    return CartItem(
+      product: ProductModel.fromMap(json['product']),
+      quantity: json['quantity'],
+    );
   }
 }
 
@@ -29,7 +34,7 @@ class CartProvider extends ChangeNotifier {
 
   int get totalPrice {
     return _cartItems.fold(0, (total, item) {
-      return total + (item.product['price'] as int) * item.quantity;
+      return total + (item.product.sellingPrice * item.quantity);
     });
   }
 
@@ -61,9 +66,9 @@ class CartProvider extends ChangeNotifier {
     await prefs.setString(_cartKey, jsonEncode(cartList));
   }
 
-  void addToCart(Map<String, dynamic> product) {
+  void addToCart(ProductModel product) {
     final existingIndex = _cartItems.indexWhere(
-      (item) => item.product['id'] == product['id'],
+      (item) => item.product.id == product.id,
     );
 
     if (existingIndex != -1) {
@@ -77,7 +82,7 @@ class CartProvider extends ChangeNotifier {
 
   void increaseQuantity(int productId) {
     final existingIndex = _cartItems.indexWhere(
-      (item) => item.product['id'] == productId,
+      (item) => item.product.id == productId,
     );
 
     if (existingIndex != -1) {
@@ -89,7 +94,7 @@ class CartProvider extends ChangeNotifier {
 
   void decreaseQuantity(int productId) {
     final existingIndex = _cartItems.indexWhere(
-      (item) => item.product['id'] == productId,
+      (item) => item.product.id == productId,
     );
 
     if (existingIndex != -1) {
@@ -104,7 +109,7 @@ class CartProvider extends ChangeNotifier {
   }
 
   void removeFromCart(int productId) {
-    _cartItems.removeWhere((item) => item.product['id'] == productId);
+    _cartItems.removeWhere((item) => item.product.id == productId);
     _saveCart();
     notifyListeners();
   }
@@ -117,8 +122,23 @@ class CartProvider extends ChangeNotifier {
 
   int getProductQuantity(int productId) {
     final item = _cartItems.firstWhere(
-      (item) => item.product['id'] == productId,
-      orElse: () => CartItem(product: {}, quantity: 0),
+      (item) => item.product.id == productId,
+      orElse: () => CartItem(
+        product: ProductModel(
+          id: 0,
+          userId: 0,
+          productCategoryId: 0,
+          productUnitId: 0,
+          name: '',
+          thumbnail: '',
+          purchasePrice: 0,
+          sellingPrice: 0,
+          stock: 0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        quantity: 0,
+      ),
     );
     return item.quantity;
   }
