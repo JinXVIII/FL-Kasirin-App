@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/constants/variables.dart';
 import '../../../../cores/themes/text_styles.dart';
+
+import '../../../../data/models/product_model.dart';
 
 import '../../../providers/cart_provider.dart';
 
@@ -21,9 +24,9 @@ class CheckoutItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final product = cartItem.product;
+    final ProductModel product = cartItem.product;
     final quantity = cartItem.quantity;
-    final subtotal = (product['price'] as int) * quantity;
+    final subtotal = product.sellingPrice * quantity;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -40,9 +43,7 @@ class CheckoutItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0),
               color: Colors.grey[200],
               image: DecorationImage(
-                image: product['imageUrl'] != null
-                    ? NetworkImage(product['imageUrl'])
-                    : const AssetImage('assets/images/no-image.png'),
+                image: _getImageProvider(product),
                 fit: BoxFit.cover,
               ),
             ),
@@ -55,7 +56,7 @@ class CheckoutItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name'],
+                  product.name,
                   style: AppTextStyles.heading4.copyWith(fontSize: 14),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -63,7 +64,7 @@ class CheckoutItemCard extends StatelessWidget {
                 const SizedBox(height: 4),
 
                 Text(
-                  'Rp ${product['price'].toString()} x $quantity',
+                  'Rp ${product.sellingPrice.toString()} x $quantity',
                   style: AppTextStyles.caption.copyWith(fontSize: 10),
                 ),
                 const SizedBox(height: 4),
@@ -135,5 +136,15 @@ class CheckoutItemCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  ImageProvider _getImageProvider(ProductModel product) {
+    final imageUrl = product.thumbnail;
+
+    if (imageUrl != null && imageUrl.toString().isNotEmpty) {
+      return NetworkImage('${Variables.baseUrlImage}/$imageUrl');
+    } else {
+      return const AssetImage('assets/images/no-image.png');
+    }
   }
 }

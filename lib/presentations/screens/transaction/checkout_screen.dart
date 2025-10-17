@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 
+import '../../../data/models/product_model.dart';
+
 import '../../providers/cart_provider.dart';
 
 import '../../widgets/custom_button.dart';
@@ -64,22 +66,17 @@ class CheckoutScreen extends StatelessWidget {
                           itemCount: cartProvider.cartItems.length,
                           itemBuilder: (context, index) {
                             final cartItem = cartProvider.cartItems[index];
+                            final ProductModel product = cartItem.product;
                             return CheckoutItemCard(
                               cartItem: cartItem,
                               onIncrease: () {
-                                cartProvider.increaseQuantity(
-                                  cartItem.product['id'],
-                                );
+                                cartProvider.increaseQuantity(product.id);
                               },
                               onDecrease: () {
-                                cartProvider.decreaseQuantity(
-                                  cartItem.product['id'],
-                                );
+                                cartProvider.decreaseQuantity(product.id);
                               },
                               onRemove: () {
-                                cartProvider.removeFromCart(
-                                  cartItem.product['id'],
-                                );
+                                cartProvider.removeFromCart(product.id);
                               },
                             );
                           },
