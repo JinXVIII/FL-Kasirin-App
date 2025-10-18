@@ -19,12 +19,16 @@ class _BestProfitProductsState extends State<BestProfitProducts> {
   @override
   void initState() {
     super.initState();
-    // Load recommendations when widget initializes
+    // Load recommendations when widget initializes if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<RecommendationProvider>(
+      final provider = Provider.of<RecommendationProvider>(
         context,
         listen: false,
-      ).getRecommendations();
+      );
+      if (provider.recommendationData == null &&
+          !provider.isLoadingRecommendations) {
+        provider.getRecommendations();
+      }
     });
   }
 

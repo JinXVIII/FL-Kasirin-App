@@ -7,6 +7,7 @@ import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 
 import '../../../presentations/providers/auth_provider.dart';
+import '../../../presentations/providers/recommendation_provider.dart';
 
 import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
@@ -25,6 +26,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final bool _isProfileCompleted = false;
   bool _isLoading = true;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -46,6 +49,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       });
     }
+  }
+
+  Future<void> _refreshData() async {
+    // Refresh recommendation data
+    final recommendationProvider = Provider.of<RecommendationProvider>(
+      context,
+      listen: false,
+    );
+    await recommendationProvider.getRecommendations();
+
+    // You can also refresh other data here if needed
+    // For example: sales data, financial data, etc.
   }
 
   @override
@@ -131,9 +146,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          : RefreshIndicator(
+              key: _refreshIndicatorKey,
+              onRefresh: _refreshData,
               child: SingleChildScrollView(
+                physics:
+                    const AlwaysScrollableScrollPhysics(), // Enable refresh indicator
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
                     // financial information card
