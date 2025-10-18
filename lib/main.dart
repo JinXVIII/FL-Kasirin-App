@@ -6,11 +6,13 @@ import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/auth_local_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
 import 'data/datasources/transaction_remote_datasource.dart';
+import 'data/datasources/recommendation_remote_datasource.dart';
 
 import 'presentations/providers/auth_provider.dart';
 import 'presentations/providers/cart_provider.dart';
 import 'presentations/providers/product_provider.dart';
 import 'presentations/providers/transaction_provider.dart';
+import 'presentations/providers/recommendation_provider.dart';
 
 import 'cores/routes/app_router.dart';
 
@@ -40,6 +42,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) =>
               TransactionProvider(TransactionRemoteDatasource()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              RecommendationProvider(RecommendationRemoteDatasource()),
         ),
       ],
       child: Builder(
