@@ -98,7 +98,7 @@ class ProductCard extends StatelessWidget {
                   Text(
                     'Stok: ${product.stock}',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: product.stock == '0'
+                      color: product.stock == 0
                           ? AppColors.red
                           : AppColors.grey,
                     ),

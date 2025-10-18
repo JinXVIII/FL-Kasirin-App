@@ -250,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         borderRadius: BorderRadius.circular(8),
                         color: _selectedBusinessCategory == null
-                            ? AppColors.disabled.withOpacity(0.1)
+                            ? AppColors.disabled.withValues(alpha: 0.1)
                             : Colors.transparent,
                       ),
                       child: DropdownButtonHideUnderline(
