@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
 
-import '../../data/models/transaction_model.dart';
 import '../../data/datasources/transaction_remote_datasource.dart';
+
+import '../../data/models/transaction_model.dart';
 import '../../data/models/request/transaction_request_model.dart';
 import '../../data/models/response/transaction_response_model.dart';
 
@@ -22,6 +23,11 @@ class TransactionProvider extends ChangeNotifier {
   HistoryTransactionResponseModel? _transactionHistory;
   List<TransactionModel> _allTransactions = [];
 
+  // Transaction detail states
+  bool _isLoadingDetail = false;
+  String? _detailError;
+  DetailTransactionResponseModel? _transactionDetail;
+
   // Getters
   bool get isProcessingTransaction => _isProcessingTransaction;
   String? get transactionError => _transactionError;
@@ -32,6 +38,10 @@ class TransactionProvider extends ChangeNotifier {
   HistoryTransactionResponseModel? get transactionHistory =>
       _transactionHistory;
   List<TransactionModel> get allTransactions => _allTransactions;
+
+  bool get isLoadingDetail => _isLoadingDetail;
+  String? get detailError => _detailError;
+  DetailTransactionResponseModel? get transactionDetail => _transactionDetail;
 
   // Create transaction method
   Future<bool> createTransaction(
@@ -103,6 +113,28 @@ class TransactionProvider extends ChangeNotifier {
     );
   }
 
+  // Get transaction detail method
+  Future<bool> getTransactionDetail(int transactionId) async {
+    _setLoadingDetail(true);
+    _detailError = null;
+
+    final Either<String, DetailTransactionResponseModel> result =
+        await _remoteDatasource.getTransactionDetail(transactionId);
+
+    return result.fold(
+      (error) {
+        _detailError = error;
+        _setLoadingDetail(false);
+        return false;
+      },
+      (response) {
+        _transactionDetail = response;
+        _setLoadingDetail(false);
+        return true;
+      },
+    );
+  }
+
   // Load more transactions (pagination)
   Future<bool> loadMoreTransactions({
     String? startDate,
@@ -132,10 +164,17 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Set loading state for detail
+  void _setLoadingDetail(bool value) {
+    _isLoadingDetail = value;
+    notifyListeners();
+  }
+
   // Clear error
   void clearError() {
     _transactionError = null;
     _historyError = null;
+    _detailError = null;
     notifyListeners();
   }
 
@@ -150,6 +189,13 @@ class TransactionProvider extends ChangeNotifier {
     _allTransactions = [];
     _transactionHistory = null;
     _historyError = null;
+    notifyListeners();
+  }
+
+  // Clear transaction detail
+  void clearTransactionDetail() {
+    _transactionDetail = null;
+    _detailError = null;
     notifyListeners();
   }
 }

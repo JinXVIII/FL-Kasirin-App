@@ -96,4 +96,43 @@ class TransactionRemoteDatasource {
       return Left(response.body);
     }
   }
+
+  Future<Either<String, DetailTransactionResponseModel>> getTransactionDetail(
+    int transactionId,
+  ) async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final response = await http.get(
+      Uri.parse('${Variables.baseUrl}/transactions/$transactionId'),
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      debugPrint('Transaction detail retrieved successfully');
+      try {
+        final detailResponse = DetailTransactionResponseModel.fromJson(
+          response.body,
+        );
+        debugPrint('Transaction ID: ${detailResponse.data.id}');
+        debugPrint('Invoice Number: ${detailResponse.data.invoiceNumber}');
+        debugPrint('Total Price: ${detailResponse.data.totalPrice}');
+        debugPrint(
+          'Details Count: ${detailResponse.data.details?.length ?? 0}',
+        );
+        return Right(detailResponse);
+      } catch (e) {
+        debugPrint('Error parsing response: $e');
+        return Left('Error parsing response: $e');
+      }
+    } else {
+      debugPrint('Error retrieving transaction detail: ${response.body}');
+      return Left(response.body);
+    }
+  }
 }

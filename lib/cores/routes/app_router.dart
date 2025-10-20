@@ -141,28 +141,8 @@ class AppRouter {
             name: RouteConstants.salesHistoryDetail,
             path: RouteConstants.salesHistoryDetailPath,
             builder: (context, state) {
-              final id = state.pathParameters['id']!;
-              return SalesHistoryDetailScreen(
-                salesData: {
-                  'id': int.parse(id),
-                  'transactionNumber': 'TRX-20230921-001',
-                  'transactionDate': DateTime.now(),
-                  'totalAmount': 42000,
-                  'paymentMethod': 'E-Wallet',
-                  'items': [
-                    {
-                      'productName': 'Nasi Goreng',
-                      'quantity': 1,
-                      'price': 25000,
-                    },
-                    {
-                      'productName': 'Kopi Hitam',
-                      'quantity': 1,
-                      'price': 15000,
-                    },
-                  ],
-                },
-              );
+              final id = int.parse(state.pathParameters['id']!);
+              return SalesHistoryDetailScreen(transactionId: id);
             },
           ),
         ],

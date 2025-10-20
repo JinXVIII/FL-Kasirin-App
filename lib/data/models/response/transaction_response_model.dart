@@ -52,6 +52,26 @@ class AddTransactionResponseModel {
   };
 }
 
+class DetailTransactionResponseModel {
+  final bool success;
+  final TransactionModel data;
+
+  DetailTransactionResponseModel({required this.success, required this.data});
+
+  factory DetailTransactionResponseModel.fromJson(String str) =>
+      DetailTransactionResponseModel.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory DetailTransactionResponseModel.fromMap(Map<String, dynamic> json) =>
+      DetailTransactionResponseModel(
+        success: json["success"],
+        data: TransactionModel.fromMap(json["data"]),
+      );
+
+  Map<String, dynamic> toMap() => {"success": success, "data": data.toMap()};
+}
+
 class Data {
   final int currentPage;
   final List<TransactionModel> data;
