@@ -1,9 +1,10 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../cores/constants/colors.dart';
+import '../../../../cores/constants/variables.dart';
 import '../../../../cores/themes/text_styles.dart';
 
-import '../../../../data/models/response/recommendation_response_model.dart';
+import '../../../../data/models/recommendation_model.dart';
 
 class ProductRankItemCard extends StatelessWidget {
   const ProductRankItemCard({
@@ -14,7 +15,7 @@ class ProductRankItemCard extends StatelessWidget {
   });
 
   final int rank;
-  final Recommendation recommendation;
+  final RecommendationModel recommendation;
   final Color rankColor;
 
   @override
@@ -39,9 +40,14 @@ class ProductRankItemCard extends StatelessWidget {
                     height: 74,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: AppColors.grey,
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/no-image.png'),
+                      color: Colors.grey[200],
+                      image: DecorationImage(
+                        image: recommendation.thumbnail.isNotEmpty
+                            ? NetworkImage(
+                                '${Variables.baseUrlImage}/${recommendation.thumbnail}',
+                              )
+                            : const AssetImage('assets/images/no-image.png')
+                                  as ImageProvider,
                         fit: BoxFit.cover,
                       ),
                     ),

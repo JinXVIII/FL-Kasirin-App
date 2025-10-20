@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../data/datasources/recommendation_remote_datasource.dart';
+
+import '../../data/models/recommendation_model.dart';
 import '../../data/models/response/recommendation_response_model.dart';
 
 class RecommendationProvider extends ChangeNotifier {
@@ -20,14 +22,14 @@ class RecommendationProvider extends ChangeNotifier {
   RecommendationResponseModel? get recommendationData => _recommendationData;
 
   // Get top recommendations (sorted by score)
-  List<Recommendation> get topRecommendations {
-    if (_recommendationData?.data.responseMl.recommendations == null) {
+  List<RecommendationModel> get topRecommendations {
+    if (_recommendationData?.data.recommendations == null) {
       return [];
     }
 
     // Sort by recommendation score in descending order and take top 5
-    final recommendations = List<Recommendation>.from(
-      _recommendationData!.data.responseMl.recommendations,
+    final recommendations = List<RecommendationModel>.from(
+      _recommendationData!.data.recommendations,
     );
 
     recommendations.sort(

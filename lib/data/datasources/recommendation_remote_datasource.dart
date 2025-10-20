@@ -29,12 +29,6 @@ class RecommendationRemoteDatasource {
         final recommendationResponse = RecommendationResponseModel.fromJson(
           response.body,
         );
-        debugPrint(
-          'Total transactions: ${recommendationResponse.data.inputSummary.uniqueProducts}',
-        );
-        debugPrint(
-          'Product recommendation: ${recommendationResponse.data.responseMl.recommendations}',
-        );
 
         return Right(recommendationResponse);
       } catch (e) {
