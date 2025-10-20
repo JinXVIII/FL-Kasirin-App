@@ -8,6 +8,7 @@ import '../../../cores/themes/text_styles.dart';
 
 import '../../../presentations/providers/auth_provider.dart';
 import '../../../presentations/providers/recommendation_provider.dart';
+import '../../../presentations/providers/transaction_provider.dart';
 
 import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
@@ -53,14 +54,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _refreshData() async {
     // Refresh recommendation data
-    final recommendationProvider = Provider.of<RecommendationProvider>(
-      context,
-      listen: false,
-    );
+    if (!mounted) return;
+    final recommendationProvider = context.read<RecommendationProvider>();
     await recommendationProvider.getRecommendations();
 
-    // You can also refresh other data here if needed
-    // For example: sales data, financial data, etc.
+    // Refresh sales count data
+    if (!mounted) return;
+    final transactionProvider = context.read<TransactionProvider>();
+    await transactionProvider.getSalesCount();
   }
 
   @override

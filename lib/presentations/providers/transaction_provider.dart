@@ -5,6 +5,7 @@ import '../../data/datasources/transaction_remote_datasource.dart';
 
 import '../../data/models/transaction_model.dart';
 import '../../data/models/request/transaction_request_model.dart';
+import '../../data/models/response/sale_statistic_response_model.dart';
 import '../../data/models/response/transaction_response_model.dart';
 
 class TransactionProvider extends ChangeNotifier {
@@ -28,6 +29,11 @@ class TransactionProvider extends ChangeNotifier {
   String? _detailError;
   DetailTransactionResponseModel? _transactionDetail;
 
+  // Sales count states
+  bool _isLoadingSalesCount = false;
+  String? _salesCountError;
+  SaleStatisticResponseModel? _salesCountData;
+
   // Getters
   bool get isProcessingTransaction => _isProcessingTransaction;
   String? get transactionError => _transactionError;
@@ -42,6 +48,10 @@ class TransactionProvider extends ChangeNotifier {
   bool get isLoadingDetail => _isLoadingDetail;
   String? get detailError => _detailError;
   DetailTransactionResponseModel? get transactionDetail => _transactionDetail;
+
+  bool get isLoadingSalesCount => _isLoadingSalesCount;
+  String? get salesCountError => _salesCountError;
+  SaleStatisticResponseModel? get salesCountData => _salesCountData;
 
   // Create transaction method
   Future<bool> createTransaction(
@@ -135,6 +145,28 @@ class TransactionProvider extends ChangeNotifier {
     );
   }
 
+  // Get sales count method
+  Future<bool> getSalesCount() async {
+    _setLoadingSalesCount(true);
+    _salesCountError = null;
+
+    final Either<String, SaleStatisticResponseModel> result =
+        await _remoteDatasource.getSalesCount();
+
+    return result.fold(
+      (error) {
+        _salesCountError = error;
+        _setLoadingSalesCount(false);
+        return false;
+      },
+      (response) {
+        _salesCountData = response;
+        _setLoadingSalesCount(false);
+        return true;
+      },
+    );
+  }
+
   // Load more transactions (pagination)
   Future<bool> loadMoreTransactions({
     String? startDate,
@@ -170,11 +202,18 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Set loading state for sales count
+  void _setLoadingSalesCount(bool value) {
+    _isLoadingSalesCount = value;
+    notifyListeners();
+  }
+
   // Clear error
   void clearError() {
     _transactionError = null;
     _historyError = null;
     _detailError = null;
+    _salesCountError = null;
     notifyListeners();
   }
 
@@ -196,6 +235,13 @@ class TransactionProvider extends ChangeNotifier {
   void clearTransactionDetail() {
     _transactionDetail = null;
     _detailError = null;
+    notifyListeners();
+  }
+
+  // Clear sales count data
+  void clearSalesCountData() {
+    _salesCountData = null;
+    _salesCountError = null;
     notifyListeners();
   }
 }

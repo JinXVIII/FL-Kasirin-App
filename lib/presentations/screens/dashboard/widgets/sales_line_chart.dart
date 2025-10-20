@@ -1,85 +1,182 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
 
-class SalesLineChart extends StatelessWidget {
+import '../../../../data/models/response/sale_statistic_response_model.dart';
+
+import '../../../../presentations/providers/transaction_provider.dart';
+
+class SalesLineChart extends StatefulWidget {
   const SalesLineChart({super.key});
 
   @override
+  State<SalesLineChart> createState() => _SalesLineChartState();
+}
+
+class _SalesLineChartState extends State<SalesLineChart> {
+  @override
+  void initState() {
+    super.initState();
+    // Load sales count data when widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TransactionProvider>().getSalesCount();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('Sales Performance', style: AppTextStyles.heading3),
-                  const SizedBox(width: 8),
-                  Icon(Icons.trending_up, color: AppColors.green, size: 24),
-                ],
-              ),
-              const SizedBox(height: 4),
-
-              Text(
-                'Weekday analytical sales product',
-                style: AppTextStyles.caption,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        AspectRatio(
-          aspectRatio: 1.5,
-          child: Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            color: AppColors.white,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+    return Consumer<TransactionProvider>(
+      builder: (context, transactionProvider, child) {
+        return Column(
+          children: [
+            // Section header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Penjualan Mingguan',
-                    style: AppTextStyles.heading4,
+                  Row(
+                    children: [
+                      Text('Sales Performance', style: AppTextStyles.heading3),
+                      const SizedBox(width: 8),
+                      Icon(Icons.trending_up, color: AppColors.green, size: 24),
+                    ],
                   ),
                   const SizedBox(height: 4),
 
-                  const Text(
-                    'Total pendapatan 7 hari terakhir',
-                    style: AppTextStyles.bodySmall,
+                  Text(
+                    'Jumlah transaksi penjualan per hari',
+                    style: AppTextStyles.caption,
                   ),
-                  const SizedBox(height: 12),
-
-                  Expanded(child: LineChart(mainData())),
                 ],
               ),
             ),
-          ),
-        ),
-      ],
+            const SizedBox(height: 12),
+
+            AspectRatio(
+              aspectRatio: 1.5,
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: AppColors.white,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Statistik Penjualan Harian',
+                        style: AppTextStyles.heading4,
+                      ),
+                      const SizedBox(height: 4),
+
+                      const Text(
+                        'Jumlah transaksi 7 hari terakhir',
+                        style: AppTextStyles.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+
+                      Expanded(
+                        child: transactionProvider.isLoadingSalesCount
+                            ? const Center(child: CircularProgressIndicator())
+                            : transactionProvider.salesCountError != null
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: AppColors.red,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Gagal memuat data',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        transactionProvider.getSalesCount();
+                                      },
+                                      child: const Text('Coba Lagi'),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : transactionProvider
+                                      .salesCountData
+                                      ?.data
+                                      .isEmpty ==
+                                  true
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.bar_chart,
+                                      color: AppColors.grey,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Belum ada data penjualan',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : LineChart(
+                                mainData(
+                                  transactionProvider.salesCountData?.data ??
+                                      [],
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+  Widget bottomTitleWidgets(
+    double value,
+    TitleMeta meta, [
+    List<SaleCountModel>? salesData,
+  ]) {
     const style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 12,
       fontFamily: 'Poppins',
     );
     String text;
-    final day = DateTime.now().subtract(Duration(days: 6 - value.toInt()));
-    text = DateFormat.E('id_ID').format(day).substring(0, 1);
+
+    if (salesData != null && salesData.isNotEmpty) {
+      // Get dayCode from sales data
+      final index = value.toInt();
+      if (index < salesData.length) {
+        text = salesData[index].dayCode;
+      } else {
+        // Fallback to calculated day
+        final day = DateTime.now().subtract(Duration(days: 6 - index));
+        text = DateFormat.E('id_ID').format(day).substring(0, 1);
+      }
+    } else {
+      // Fallback to calculated day
+      final day = DateTime.now().subtract(Duration(days: 6 - value.toInt()));
+      text = DateFormat.E('id_ID').format(day).substring(0, 1);
+    }
 
     return SideTitleWidget(
       meta: meta,
@@ -97,37 +194,52 @@ class SalesLineChart extends StatelessWidget {
     String text;
     if (value == 0) {
       text = '0';
-    } else if (value >= 1000000) {
-      text = '${(value / 1000000).toStringAsFixed(1)}Jt';
-    } else if (value >= 1000) {
-      text = '${(value / 1000).toStringAsFixed(0)}Rb';
     } else {
-      return Container();
+      text = value.round().toString();
     }
 
     return Text(text, style: style, textAlign: TextAlign.left);
   }
 
-  LineChartData mainData() {
-    final List<double> weeklySales = [
-      120000,
-      180000,
-      150000,
-      250000,
-      220000,
-      300000,
-      280000,
-    ];
+  LineChartData mainData(List<SaleCountModel> salesData) {
+    // Process sales data to get counts for the last 7 days
+    final Map<DateTime, int> dailySales = {};
+    final now = DateTime.now();
 
-    final List<FlSpot> spots = weeklySales.asMap().entries.map((entry) {
-      return FlSpot(entry.key.toDouble(), entry.value);
-    }).toList();
+    // Initialize last 7 days with 0 sales
+    for (int i = 6; i >= 0; i--) {
+      final day = DateTime(now.year, now.month, now.day - i);
+      dailySales[day] = 0;
+    }
+
+    // Fill with actual sales data
+    for (final sale in salesData) {
+      final saleDate = DateTime(sale.date.year, sale.date.month, sale.date.day);
+      if (dailySales.containsKey(saleDate)) {
+        dailySales[saleDate] = sale.count;
+      }
+    }
+
+    // Create spots for chart
+    final List<FlSpot> spots = [];
+    double maxY = 10; // Default max Y value
+
+    dailySales.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key))
+      ..forEach((entry) {
+        spots.add(FlSpot(spots.length.toDouble(), entry.value.toDouble()));
+        maxY = maxY > entry.value ? maxY : entry.value.toDouble();
+      });
+
+    // Add some padding to max Y and ensure it's at least 1
+    maxY = (maxY * 1.2).ceil().toDouble();
+    if (maxY < 1) maxY = 1.0;
 
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,
-        horizontalInterval: 100000,
+        horizontalInterval: maxY > 10 ? (maxY / 5).ceilToDouble() : 1,
         getDrawingHorizontalLine: (value) {
           return const FlLine(color: Color(0xff37434d), strokeWidth: 1);
         },
@@ -146,13 +258,14 @@ class SalesLineChart extends StatelessWidget {
             showTitles: true,
             reservedSize: 30,
             interval: 1,
-            getTitlesWidget: bottomTitleWidgets,
+            getTitlesWidget: (value, meta) =>
+                bottomTitleWidgets(value, meta, salesData),
           ),
         ),
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: 100000,
+            interval: maxY > 10 ? (maxY / 5).ceilToDouble() : 1,
             getTitlesWidget: leftTitleWidgets,
             reservedSize: 42,
           ),
@@ -165,7 +278,7 @@ class SalesLineChart extends StatelessWidget {
       minX: 0,
       maxX: 6,
       minY: 0,
-      maxY: 400000,
+      maxY: maxY,
       lineBarsData: [
         LineChartBarData(
           spots: spots,
@@ -175,7 +288,21 @@ class SalesLineChart extends StatelessWidget {
           ),
           barWidth: 5,
           isStrokeCapRound: true,
-          dotData: const FlDotData(show: false),
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, barData, index) {
+              // Check if this spot is today (last spot in our 7-day range)
+              final isToday = index == spots.length - 1;
+              return FlDotCirclePainter(
+                radius: isToday ? 6 : 4, // Larger dot for today
+                color: isToday
+                    ? Colors.white
+                    : Colors.transparent, // White dot for today
+                strokeWidth: isToday ? 2 : 0,
+                strokeColor: isToday ? AppColors.primary : Colors.transparent,
+              );
+            },
+          ),
           belowBarData: BarAreaData(
             show: true,
             gradient: LinearGradient(

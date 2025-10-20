@@ -7,6 +7,7 @@ import 'auth_local_datasource.dart';
 import '../../cores/constants/variables.dart';
 
 import '../models/request/transaction_request_model.dart';
+import '../models/response/sale_statistic_response_model.dart';
 import '../models/response/transaction_response_model.dart';
 
 class TransactionRemoteDatasource {
@@ -132,6 +133,49 @@ class TransactionRemoteDatasource {
       }
     } else {
       debugPrint('Error retrieving transaction detail: ${response.body}');
+      return Left(response.body);
+    }
+  }
+
+  Future<Either<String, SaleStatisticResponseModel>> getSalesCount() async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final response = await http.get(
+      Uri.parse('${Variables.baseUrl}/transactions/sales-count'),
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Sales Count Response status: ${response.statusCode}');
+    debugPrint('Sales Count Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      debugPrint('Sales count retrieved successfully');
+      try {
+        final salesCountResponse = SaleStatisticResponseModel.fromJson(
+          response.body,
+        );
+        debugPrint(
+          'Total sales data points: ${salesCountResponse.data.length}',
+        );
+        if (salesCountResponse.data.isNotEmpty) {
+          debugPrint('First sale date: ${salesCountResponse.data.first.date}');
+          debugPrint(
+            'First sale count: ${salesCountResponse.data.first.count}',
+          );
+          debugPrint(
+            'First sale revenue: ${salesCountResponse.data.first.totalRevenue}',
+          );
+        }
+        return Right(salesCountResponse);
+      } catch (e) {
+        debugPrint('Error parsing sales count response: $e');
+        return Left('Error parsing response: $e');
+      }
+    } else {
+      debugPrint('Error retrieving sales count: ${response.body}');
       return Left(response.body);
     }
   }
