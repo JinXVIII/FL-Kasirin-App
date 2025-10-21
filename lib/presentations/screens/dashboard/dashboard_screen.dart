@@ -53,14 +53,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _refreshData() async {
-    // Refresh recommendation data
     if (!mounted) return;
     final recommendationProvider = context.read<RecommendationProvider>();
-    await recommendationProvider.getRecommendations();
-
-    // Refresh sales count data
-    if (!mounted) return;
     final transactionProvider = context.read<TransactionProvider>();
+
+    await transactionProvider.getInformationSale();
+    await recommendationProvider.getRecommendations();
     await transactionProvider.getSalesCount();
   }
 

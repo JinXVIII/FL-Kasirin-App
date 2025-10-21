@@ -5,8 +5,9 @@ import '../../data/datasources/transaction_remote_datasource.dart';
 
 import '../../data/models/transaction_model.dart';
 import '../../data/models/request/transaction_request_model.dart';
-import '../../data/models/response/sale_statistic_response_model.dart';
 import '../../data/models/response/transaction_response_model.dart';
+import '../../data/models/response/sale_statistic_response_model.dart';
+import '../../data/models/response/statistic_response_model.dart';
 
 class TransactionProvider extends ChangeNotifier {
   final TransactionRemoteDatasource _remoteDatasource;
@@ -34,6 +35,11 @@ class TransactionProvider extends ChangeNotifier {
   String? _salesCountError;
   SaleStatisticResponseModel? _salesCountData;
 
+  // Information sale states
+  bool _isLoadingInformationSale = false;
+  String? _informationSaleError;
+  StatisticResponseModel? _informationSaleData;
+
   // Getters
   bool get isProcessingTransaction => _isProcessingTransaction;
   String? get transactionError => _transactionError;
@@ -52,6 +58,10 @@ class TransactionProvider extends ChangeNotifier {
   bool get isLoadingSalesCount => _isLoadingSalesCount;
   String? get salesCountError => _salesCountError;
   SaleStatisticResponseModel? get salesCountData => _salesCountData;
+
+  bool get isLoadingInformationSale => _isLoadingInformationSale;
+  String? get informationSaleError => _informationSaleError;
+  StatisticResponseModel? get informationSaleData => _informationSaleData;
 
   // Create transaction method
   Future<bool> createTransaction(
@@ -167,6 +177,28 @@ class TransactionProvider extends ChangeNotifier {
     );
   }
 
+  // Get information sale method
+  Future<bool> getInformationSale() async {
+    _setLoadingInformationSale(true);
+    _informationSaleError = null;
+
+    final Either<String, StatisticResponseModel> result =
+        await _remoteDatasource.getInformationSale();
+
+    return result.fold(
+      (error) {
+        _informationSaleError = error;
+        _setLoadingInformationSale(false);
+        return false;
+      },
+      (response) {
+        _informationSaleData = response;
+        _setLoadingInformationSale(false);
+        return true;
+      },
+    );
+  }
+
   // Load more transactions (pagination)
   Future<bool> loadMoreTransactions({
     String? startDate,
@@ -208,12 +240,19 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Set loading state for information sale
+  void _setLoadingInformationSale(bool value) {
+    _isLoadingInformationSale = value;
+    notifyListeners();
+  }
+
   // Clear error
   void clearError() {
     _transactionError = null;
     _historyError = null;
     _detailError = null;
     _salesCountError = null;
+    _informationSaleError = null;
     notifyListeners();
   }
 
@@ -242,6 +281,13 @@ class TransactionProvider extends ChangeNotifier {
   void clearSalesCountData() {
     _salesCountData = null;
     _salesCountError = null;
+    notifyListeners();
+  }
+
+  // Clear information sale data
+  void clearInformationSaleData() {
+    _informationSaleData = null;
+    _informationSaleError = null;
     notifyListeners();
   }
 }

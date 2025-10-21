@@ -7,8 +7,9 @@ import 'auth_local_datasource.dart';
 import '../../cores/constants/variables.dart';
 
 import '../models/request/transaction_request_model.dart';
-import '../models/response/sale_statistic_response_model.dart';
 import '../models/response/transaction_response_model.dart';
+import '../models/response/sale_statistic_response_model.dart';
+import '../models/response/statistic_response_model.dart';
 
 class TransactionRemoteDatasource {
   Future<Either<String, AddTransactionResponseModel>> createTransaction(
@@ -169,6 +170,38 @@ class TransactionRemoteDatasource {
             'First sale revenue: ${salesCountResponse.data.first.totalRevenue}',
           );
         }
+        return Right(salesCountResponse);
+      } catch (e) {
+        debugPrint('Error parsing sales count response: $e');
+        return Left('Error parsing response: $e');
+      }
+    } else {
+      debugPrint('Error retrieving sales count: ${response.body}');
+      return Left(response.body);
+    }
+  }
+
+  Future<Either<String, StatisticResponseModel>> getInformationSale() async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final response = await http.get(
+      Uri.parse('${Variables.baseUrl}/transactions/statistics'),
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Statistics Response status: ${response.statusCode}');
+    debugPrint('Statistics Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      debugPrint('Statistics retrieved successfully');
+      try {
+        final salesCountResponse = StatisticResponseModel.fromJson(
+          response.body,
+        );
+
         return Right(salesCountResponse);
       } catch (e) {
         debugPrint('Error parsing sales count response: $e');
