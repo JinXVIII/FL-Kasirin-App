@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
@@ -60,14 +61,7 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
                             style: AppTextStyles.whiteBodySmall,
                           ),
                           if (transactionProvider.isLoadingInformationSale)
-                            Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(10),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            )
+                            ValueLoadingShimmer()
                           else
                             Text(
                               transactionProvider
@@ -93,14 +87,7 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
                             style: AppTextStyles.whiteBodySmall,
                           ),
                           if (transactionProvider.isLoadingInformationSale)
-                            Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(10),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            )
+                            ValueLoadingShimmer()
                           else
                             Text(
                               transactionProvider
@@ -134,14 +121,7 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
                             style: AppTextStyles.whiteBodySmall,
                           ),
                           if (transactionProvider.isLoadingInformationSale)
-                            Container(
-                              height: 20,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(10),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            )
+                            ValueLoadingShimmer()
                           else
                             Text(
                               transactionProvider
@@ -166,14 +146,7 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
                             style: AppTextStyles.whiteBodySmall,
                           ),
                           if (transactionProvider.isLoadingInformationSale)
-                            Container(
-                              height: 20,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(10),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            )
+                            ValueLoadingShimmer()
                           else
                             Text(
                               transactionProvider
@@ -211,6 +184,30 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
     return value.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',
+    );
+  }
+}
+
+class ValueLoadingShimmer extends StatelessWidget {
+  const ValueLoadingShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      duration: const Duration(seconds: 2),
+      interval: const Duration(seconds: 1),
+      color: Colors.white.withAlpha(10),
+      colorOpacity: 0.3,
+      enabled: true,
+      direction: ShimmerDirection.fromLTRB(),
+      child: Container(
+        height: 20,
+        width: 80,
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(10),
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
     );
   }
 }

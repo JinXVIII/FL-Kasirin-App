@@ -7,6 +7,7 @@ import '../../../../cores/themes/text_styles.dart';
 import '../../../providers/recommendation_provider.dart';
 
 import 'product_rank_item_card.dart';
+import 'product_rank_item_shimmer.dart';
 
 class BestProfitProducts extends StatefulWidget {
   const BestProfitProducts({super.key});
@@ -87,7 +88,6 @@ class _BestProfitProductsState extends State<BestProfitProducts> {
           builder: (context, provider, child) {
             if (provider.isLoadingRecommendations) {
               return Container(
-                height: 400,
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -99,13 +99,22 @@ class _BestProfitProductsState extends State<BestProfitProducts> {
                     ),
                   ],
                 ),
-                child: const Center(child: CircularProgressIndicator()),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 5, // Show 5 shimmer items
+                  padding: EdgeInsets.zero,
+                  separatorBuilder: (context, index) =>
+                      Divider(height: 0.5, color: AppColors.card, indent: 25),
+                  itemBuilder: (context, index) {
+                    return const ProductRankItemShimmer();
+                  },
+                ),
               );
             }
 
             if (provider.recommendationError != null) {
               return Container(
-                height: 400,
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -151,7 +160,6 @@ class _BestProfitProductsState extends State<BestProfitProducts> {
 
             if (recommendations.isEmpty) {
               return Container(
-                height: 400,
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),

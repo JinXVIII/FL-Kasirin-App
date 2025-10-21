@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
@@ -84,7 +85,67 @@ class _SalesLineChartState extends State<SalesLineChart> {
 
                       Expanded(
                         child: transactionProvider.isLoadingSalesCount
-                            ? const Center(child: CircularProgressIndicator())
+                            ? Shimmer(
+                                duration: const Duration(seconds: 2),
+                                interval: const Duration(seconds: 1),
+                                color: Colors.grey.shade300,
+                                colorOpacity: 0.3,
+                                enabled: true,
+                                direction: ShimmerDirection.fromLTRB(),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Chart title shimmer
+                                      Container(
+                                        height: 20,
+                                        width: 150,
+                                        margin: const EdgeInsets.only(
+                                          bottom: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Chart subtitle shimmer
+                                      Container(
+                                        height: 14,
+                                        width: 120,
+                                        margin: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Chart area shimmer
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade300,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
                             : transactionProvider.salesCountError != null
                             ? Center(
                                 child: Column(
@@ -96,11 +157,13 @@ class _SalesLineChartState extends State<SalesLineChart> {
                                       size: 48,
                                     ),
                                     const SizedBox(height: 8),
+
                                     Text(
                                       'Gagal memuat data',
                                       style: AppTextStyles.bodyMedium,
                                     ),
                                     const SizedBox(height: 8),
+
                                     ElevatedButton(
                                       onPressed: () {
                                         transactionProvider.getSalesCount();
@@ -125,6 +188,7 @@ class _SalesLineChartState extends State<SalesLineChart> {
                                       size: 48,
                                     ),
                                     const SizedBox(height: 8),
+
                                     Text(
                                       'Belum ada data penjualan',
                                       style: AppTextStyles.bodyMedium,
