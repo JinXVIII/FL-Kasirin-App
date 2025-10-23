@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 
+import '../../../data/datasources/auth_local_datasource.dart';
+
 import '../../../data/models/business_category_model.dart';
 import '../../../data/models/business_type_model.dart';
 import '../../../data/models/request/profile_business_request_model.dart';
@@ -95,6 +97,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
+    if (_phoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nomor telepon harus diisi'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
     _saveProfile();
   }
 
@@ -106,24 +118,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       storeName: _businessNameController.text,
       businessTypeId: provider.selectedBusinessType!.id,
       address: _addressController.text,
-      phoneNumber: _phoneController.text.isNotEmpty
-          ? _phoneController.text
-          : null,
+      phoneNumber: _phoneController.text,
     );
 
     final success = await provider.completeStoreProfile(requestModel);
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil toko berhasil disimpan!'),
-            backgroundColor: AppColors.green,
-          ),
-        );
+        // Update business profile status in local storage
+        final authLocalDatasource = AuthLocalDatasource();
+        await authLocalDatasource.updateBusinessProfileStatus(true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profil toko berhasil disimpan!'),
+              backgroundColor: AppColors.green,
+            ),
+          );
 
-        // Navigate back to dashboard
-        context.pushReplacement('/dashboard');
+          // Navigate back to dashboard
+          context.pushReplacement('/dashboard');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -329,10 +344,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 20),
 
-                          // Phone field (optional)
+                          // Phone field
                           CustomTextField(
                             controller: _phoneController,
-                            label: 'No Handphone (Opsional)',
+                            label: 'No Handphone',
                             keyboardType: TextInputType.phone,
                           ),
                           const SizedBox(height: 40),
