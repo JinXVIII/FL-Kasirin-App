@@ -1,3 +1,4 @@
+import 'package:fe_kasirin_app/cores/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -33,10 +34,7 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Detail Penjualan",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
+        title: const Text("Detail Penjualan", style: AppTextStyles.titlePage),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -114,20 +112,14 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                               Expanded(
                                 child: Text(
                                   transaction.invoiceNumber,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: AppTextStyles.heading4,
                                 ),
                               ),
                               Text(
                                 DateFormat(
                                   'dd MMM yyyy, HH:mm',
                                 ).format(transaction.createdAt),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
+                                style: AppTextStyles.caption,
                               ),
                             ],
                           ),
@@ -146,10 +138,7 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Pembeli: ${transaction.buyer}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: AppTextStyles.heading4,
                                 ),
                               ],
                             ),
@@ -167,10 +156,7 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 'Metode Pembayaran: ${transaction.paymentMethod}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: AppTextStyles.bodyMedium,
                               ),
                             ],
                           ),
@@ -185,18 +171,11 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                             children: [
                               const Text(
                                 'Total Pembayaran:',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: AppTextStyles.heading4,
                               ),
                               Text(
                                 'Rp ${NumberFormat('#,###').format(transaction.totalPrice)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.green,
-                                ),
+                                style: AppTextStyles.priceMedium,
                               ),
                             ],
                           ),
@@ -208,18 +187,11 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Dibayar:',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
+                                Text('Dibayar:', style: AppTextStyles.caption),
                                 Text(
                                   'Rp ${NumberFormat('#,###').format(transaction.paidAmount)}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.green[600],
+                                  style: AppTextStyles.priceSmall.copyWith(
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                               ],
@@ -231,16 +203,13 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                                 children: [
                                   Text(
                                     'Kembali:',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
+                                    style: AppTextStyles.caption,
                                   ),
                                   Text(
                                     'Rp ${NumberFormat('#,###').format(transaction.changeAmount)}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.orange[600],
+                                    style: AppTextStyles.priceSmall.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
                                 ],
@@ -255,10 +224,7 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                   const SizedBox(height: 24),
 
                   // Items section
-                  const Text(
-                    'Item yang Dibeli',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
+                  const Text('Item yang Dibeli', style: AppTextStyles.heading4),
                   const SizedBox(height: 16),
 
                   // Items list
@@ -289,10 +255,7 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                                 // Product name
                                 Text(
                                   productName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: AppTextStyles.bodyMedium,
                                 ),
                                 const SizedBox(height: 8),
 
@@ -303,17 +266,13 @@ class _SalesHistoryDetailScreenState extends State<SalesHistoryDetailScreen> {
                                   children: [
                                     Text(
                                       '$quantity item x Rp ${NumberFormat('#,###').format(price)}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
+                                      style: AppTextStyles.caption,
                                     ),
 
                                     Text(
                                       'Rp ${NumberFormat('#,###').format(subtotal)}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      style: AppTextStyles.priceSmall.copyWith(
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ],
