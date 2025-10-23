@@ -1,14 +1,16 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../cores/constants/colors.dart';
 import '../../../../cores/themes/text_styles.dart';
-
 import '../../../../presentations/providers/transaction_provider.dart';
 
 class FinancialInformationCard extends StatefulWidget {
-  const FinancialInformationCard({super.key});
+  final String userName;
+
+  const FinancialInformationCard({super.key, required this.userName});
 
   @override
   State<FinancialInformationCard> createState() =>
@@ -42,7 +44,10 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Warung Madura United", style: AppTextStyles.whiteHeading3),
+              Text(
+                "Halo, ${widget.userName}",
+                style: AppTextStyles.whiteHeading3,
+              ),
               const SizedBox(height: 4),
 
               Divider(thickness: 0.5, color: Colors.white),

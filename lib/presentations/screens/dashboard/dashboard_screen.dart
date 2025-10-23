@@ -169,61 +169,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         },
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              key: _refreshIndicatorKey,
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                physics:
-                    const AlwaysScrollableScrollPhysics(), // Enable refresh indicator
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    // financial information card
-                    FinancialInformationCard(),
-                    const SizedBox(height: 14),
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  key: _refreshIndicatorKey,
+                  onRefresh: _refreshData,
+                  child: SingleChildScrollView(
+                    physics:
+                        const AlwaysScrollableScrollPhysics(), // Enable refresh indicator
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        // financial information card
+                        FinancialInformationCard(
+                          userName: authProvider.user?.name ?? 'User',
+                        ),
+                        const SizedBox(height: 14),
 
-                    // Menu app
-                    LayoutBuilder(
-                      builder: (context, constraint) {
-                        var spacing = 8.0;
-                        var rowCount = 4;
+                        // Menu app
+                        LayoutBuilder(
+                          builder: (context, constraint) {
+                            var spacing = 8.0;
+                            var rowCount = 4;
 
-                        return Wrap(
-                          runSpacing: spacing,
-                          spacing: spacing,
-                          children: List.generate(menus.length, (index) {
-                            var item = menus[index];
-                            var isProFeature = item["isPro"] ?? false;
+                            return Wrap(
+                              runSpacing: spacing,
+                              spacing: spacing,
+                              children: List.generate(menus.length, (index) {
+                                var item = menus[index];
+                                var isProFeature = item["isPro"] ?? false;
 
-                            var size =
-                                (constraint.biggest.width -
-                                    ((rowCount + 1) * spacing)) /
-                                rowCount;
+                                var size =
+                                    (constraint.biggest.width -
+                                        ((rowCount + 1) * spacing)) /
+                                    rowCount;
 
-                            return MenuItemCard(
-                              item: item,
-                              size: size,
-                              isProFeature: isProFeature,
+                                return MenuItemCard(
+                                  item: item,
+                                  size: size,
+                                  isProFeature: isProFeature,
+                                );
+                              }),
                             );
-                          }),
-                        );
-                      },
+                          },
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Best Profit Products
+                        BestProfitProducts(),
+                        const SizedBox(height: 14),
+
+                        // Chart sales
+                        SalesLineChart(),
+                        const SizedBox(height: 14),
+                      ],
                     ),
-                    const SizedBox(height: 18),
-
-                    // Best Profit Products
-                    BestProfitProducts(),
-                    const SizedBox(height: 14),
-
-                    // Chart sales
-                    SalesLineChart(),
-                    const SizedBox(height: 14),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                );
+        },
+      ),
     );
   }
 }
