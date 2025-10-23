@@ -6,6 +6,7 @@ import '../../presentations/screens/splash/splash_screen.dart';
 import '../../presentations/screens/auth/login_screen.dart';
 import '../../presentations/screens/auth/register_screen.dart';
 import '../../presentations/screens/profile/profile_screen.dart';
+import '../../presentations/screens/profile/edit_profile_screen.dart';
 import '../../presentations/screens/dashboard/dashboard_screen.dart';
 import '../../presentations/screens/product/product_screen.dart';
 import '../../presentations/screens/product/add_product_screen.dart';
@@ -27,6 +28,9 @@ class RouteConstants {
 
   static const String profile = 'profile';
   static const String profilePath = '/profile';
+
+  static const String editProfile = 'edit-profile';
+  static const String editProfilePath = '/edit-profile';
 
   static const String dashboard = 'dashboard';
   static const String dashboardPath = '/dashboard';
@@ -96,6 +100,11 @@ class AppRouter {
             name: RouteConstants.profile,
             path: RouteConstants.profilePath,
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            name: RouteConstants.editProfile,
+            path: RouteConstants.editProfilePath,
+            builder: (context, state) => const EditProfileScreen(),
           ),
           GoRoute(
             name: RouteConstants.dashboard,

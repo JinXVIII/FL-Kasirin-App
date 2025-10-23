@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../cores/constants/colors.dart';
+import '../../cores/routes/app_router.dart';
 import '../../cores/themes/text_styles.dart';
 
 import '../providers/auth_provider.dart';
@@ -185,8 +186,8 @@ class AppDrawer extends StatelessWidget {
       {
         'icon': Icons.settings_outlined,
         'title': 'Pengaturan',
-        'route': '/settings',
-        'onTap': () {}, // TODO: Navigate to settings screen
+        'route': '/edit-profile',
+        'onTap': () => context.pushNamed(RouteConstants.editProfile),
       },
       {
         'icon': Icons.star_outlined,

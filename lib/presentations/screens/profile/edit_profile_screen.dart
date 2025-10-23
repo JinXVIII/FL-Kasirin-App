@@ -15,18 +15,23 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_dropdown.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _businessNameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _showPasswordFields = false;
 
   @override
   void initState() {
@@ -39,7 +44,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _loadInitialData() async {
     final provider = context.read<ProfileBusinessProvider>();
 
-    await provider.getBusinessCategories();
+    // Load business categories and profile data
+    await Future.wait([
+      provider.getBusinessCategories(),
+      provider.getBusinessProfile(),
+    ]);
+
+    // Populate form if profile data exists
+    if (mounted && provider.profileData?.data != null) {
+      final profileData = provider.profileData!.data.businessProfile;
+      final userData = provider.profileData!.data;
+
+      _businessNameController.text = profileData.storeName;
+      _addressController.text = profileData.address;
+      _phoneController.text = profileData.phoneNumber;
+      _nameController.text = userData.name;
+
+      // Find and set the business category from the provider's list
+      if (profileData.businessType.businessCategory != null) {
+        final businessCategory = profileData.businessType.businessCategory!;
+        provider.setSelectedBusinessCategory(
+          provider.businessCategories.firstWhere(
+            (category) => category.id == businessCategory.id,
+            orElse: () => businessCategory,
+          ),
+        );
+
+        // Load business types for this category
+        await provider.getBusinessTypesByCategory(businessCategory.id);
+
+        // Set selected business type after business types are loaded
+        final businessType = profileData.businessType;
+        provider.setSelectedBusinessType(
+          provider.businessTypes.firstWhere(
+            (type) => type.id == businessType.id,
+            orElse: () => businessType,
+          ),
+        );
+      }
+    }
+
     provider.setLoadingInitial(false);
   }
 
@@ -48,6 +92,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _businessNameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
+    _nameController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -55,6 +102,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final provider = context.read<ProfileBusinessProvider>();
 
     // Manual validation since CustomTextField doesn't have validator
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nama harus diisi'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
     if (_businessNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -95,13 +152,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
+    // Validate password fields if they are shown
+    if (_showPasswordFields) {
+      if (_newPasswordController.text.isNotEmpty) {
+        if (_newPasswordController.text.length < 6) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Password baru minimal 6 karakter'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+          return;
+        }
+
+        if (_newPasswordController.text != _confirmPasswordController.text) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Konfirmasi password tidak cocok'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
     _saveProfile();
   }
 
   void _saveProfile() async {
     final provider = context.read<ProfileBusinessProvider>();
 
-    // Create request model
+    // First update business profile
     final requestModel = ProfileBusinessRequestModel(
       storeName: _businessNameController.text,
       businessTypeId: provider.selectedBusinessType!.id,
@@ -111,13 +193,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : null,
     );
 
-    final success = await provider.completeStoreProfile(requestModel);
+    final businessSuccess = await provider.completeStoreProfile(requestModel);
 
     if (mounted) {
-      if (success) {
+      if (businessSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Profil toko berhasil disimpan!'),
+            content: Text('Profil toko berhasil diperbarui!'),
             backgroundColor: AppColors.green,
           ),
         );
@@ -127,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage ?? 'Gagal menyimpan profil'),
+            content: Text(provider.errorMessage ?? 'Gagal memperbarui profil'),
             backgroundColor: AppColors.red,
           ),
         );
@@ -142,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.body,
         elevation: 0,
-        title: Text('Lengkapi Profil Toko', style: AppTextStyles.titlePage),
+        title: Text('Edit Profil', style: AppTextStyles.titlePage),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
@@ -163,6 +245,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          const SizedBox(height: 20),
+
+                          // User name field
+                          CustomTextField(
+                            controller: _nameController,
+                            label: 'Nama Lengkap',
+                          ),
                           const SizedBox(height: 20),
 
                           // Business name field
@@ -202,7 +291,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 hintText: 'Pilih Kategori Usaha',
                                 enabled: !provider.isLoadingCategories,
                                 onChanged: (BusinessCategoryModel? newValue) {
-                                  // Load business types for selected category
                                   if (newValue != null) {
                                     provider.getBusinessTypesByCategory(
                                       newValue.id,
@@ -211,9 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   provider.setSelectedBusinessCategory(
                                     newValue,
                                   );
-                                  provider.setSelectedBusinessType(
-                                    null,
-                                  ); // Reset business type when category changes
+                                  provider.setSelectedBusinessType(null);
                                 },
                                 itemBuilder: (context, category) {
                                   return Text(
@@ -231,13 +317,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             builder: (context, provider, child) {
                               // Show loading state when categories are loading
                               if (provider.isLoadingCategories) {
-                                return CustomDropdown<BusinessTypeModel>(
-                                  value: null,
-                                  items: [],
-                                  label: 'Jenis Usaha',
-                                  hintText: 'Pilih kategori terlebih dahulu',
-                                  enabled: false,
-                                );
+                                if (provider.isLoadingCategories) {
+                                  return CustomDropdown<BusinessTypeModel>(
+                                    value: null,
+                                    items: [],
+                                    label: 'Jenis Usaha',
+                                    hintText: 'Pilih kategori terlebih dahulu',
+                                    enabled: false,
+                                  );
+                                }
                               }
 
                               // Show loading state when business types are loading
@@ -335,6 +423,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             label: 'No Handphone (Opsional)',
                             keyboardType: TextInputType.phone,
                           ),
+                          const SizedBox(height: 30),
+
+                          // Password section
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Ubah Password',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _showPasswordFields =
+                                              !_showPasswordFields;
+                                        });
+                                      },
+                                      child: Text(
+                                        _showPasswordFields ? 'Batal' : 'Ubah',
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: AppColors.orange,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (_showPasswordFields) ...[
+                                  const SizedBox(height: 16),
+                                  CustomTextField(
+                                    controller: _newPasswordController,
+                                    label: 'Password Baru (Minimal 6 karakter)',
+                                    obscureText: true,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  CustomTextField(
+                                    controller: _confirmPasswordController,
+                                    label: 'Konfirmasi Password Baru',
+                                    obscureText: true,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 40),
 
                           // Save button
@@ -346,7 +489,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     : _validateAndSave,
                                 label: provider.isSubmitting
                                     ? 'Menyimpan...'
-                                    : 'Simpan Profil',
+                                    : 'Simpan Perubahan',
                                 disabled: provider.isSubmitting,
                               );
                             },
