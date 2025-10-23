@@ -177,68 +177,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Consumer<ProfileBusinessProvider>(
                             builder: (context, provider, child) {
                               if (provider.isLoadingCategories) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Kategori Usaha',
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 6.0),
-                                    Shimmer(
-                                      duration: const Duration(seconds: 2),
-                                      interval: const Duration(seconds: 1),
-                                      color: Colors.grey.shade300,
-                                      colorOpacity: 0.3,
-                                      enabled: true,
-                                      direction: ShimmerDirection.fromLTRB(),
-                                      child: Container(
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade300,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                return CustomDropdown<BusinessCategoryModel>(
+                                  value: null,
+                                  items: const [],
+                                  label: "Kategori Usaha",
+                                  hintText: "Memuat kategori usaha...",
+                                  enabled: false,
                                 );
                               }
 
                               if (provider.categoriesError != null) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Kategori Usaha',
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      height: 56,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: AppColors.red,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          'Gagal memuat kategori',
-                                          style: AppTextStyles.bodySmall
-                                              .copyWith(color: AppColors.red),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      provider.categoriesError!,
-                                      style: AppTextStyles.caption.copyWith(
-                                        color: AppColors.red,
-                                      ),
-                                    ),
-                                  ],
+                                return CustomDropdown<BusinessCategoryModel>(
+                                  value: null,
+                                  items: const [],
+                                  label: "Kategori usaha",
+                                  hintText: "Gagal memuat kategori usaha",
+                                  enabled: false,
                                 );
                               }
 
@@ -278,93 +232,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             builder: (context, provider, child) {
                               // Show loading state when categories are loading
                               if (provider.isLoadingCategories) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Jenis Usaha',
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 6.0),
-                                    CustomDropdown<BusinessTypeModel>(
-                                      value: null,
-                                      items: [],
-                                      label: 'Jenis Usaha',
-                                      hintText:
-                                          'Pilih kategori terlebih dahulu',
-                                      enabled: false,
-                                    ),
-                                  ],
+                                return CustomDropdown<BusinessTypeModel>(
+                                  value: null,
+                                  items: [],
+                                  label: 'Jenis Usaha',
+                                  hintText: 'Pilih kategori terlebih dahulu',
+                                  enabled: false,
                                 );
                               }
 
                               // Show loading state when business types are loading
                               if (provider.isLoadingTypes) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Jenis Usaha',
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 6.0),
-                                    Shimmer(
-                                      duration: const Duration(seconds: 2),
-                                      interval: const Duration(seconds: 1),
-                                      color: Colors.grey.shade100,
-                                      colorOpacity: 0.3,
-                                      enabled: true,
-                                      direction: ShimmerDirection.fromLTRB(),
-                                      child: Container(
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: AppColors.grey,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                return CustomDropdown<BusinessTypeModel>(
+                                  value: null,
+                                  items: const [],
+                                  label: "Jenis Usaha",
+                                  hintText: "Memuat jenis usaha...",
+                                  enabled: false,
                                 );
                               }
 
                               // Show error state
                               if (provider.typesError != null) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Jenis Usaha',
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      height: 56,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: AppColors.red,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          'Gagal memuat jenis usaha',
-                                          style: AppTextStyles.bodySmall
-                                              .copyWith(color: AppColors.red),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      provider.typesError!,
-                                      style: AppTextStyles.caption.copyWith(
-                                        color: AppColors.red,
-                                      ),
-                                    ),
-                                  ],
+                                return CustomDropdown<BusinessTypeModel>(
+                                  value: null,
+                                  items: const [],
+                                  label: "Jenis Usaha",
+                                  hintText: "Gagal memuat jenis usaha",
+                                  enabled: false,
                                 );
                               }
 

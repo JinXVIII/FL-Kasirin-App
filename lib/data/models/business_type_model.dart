@@ -48,4 +48,16 @@ class BusinessTypeModel {
     "updated_at": updatedAt?.toIso8601String(),
     "business_category": businessCategory?.toMap(),
   };
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is BusinessTypeModel &&
+        other.id == id &&
+        other.businessCategoryId == businessCategoryId &&
+        other.name == name;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ businessCategoryId.hashCode ^ name.hashCode;
 }
