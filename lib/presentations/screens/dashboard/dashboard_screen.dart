@@ -33,6 +33,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize data after the widget is fully built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+
     _checkProfileStatus();
   }
 
@@ -50,6 +56,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       });
     }
+  }
+
+  Future<void> _initializeData() async {
+    final recommendationProvider = Provider.of<RecommendationProvider>(
+      context,
+      listen: false,
+    );
+    final transactionProvider = Provider.of<TransactionProvider>(
+      context,
+      listen: false,
+    );
+
+    // Clear previous data before loading new data
+    transactionProvider.clearInformationSaleData();
+    transactionProvider.clearSalesCountData();
+    recommendationProvider.clearRecommendations();
+
+    await transactionProvider.getInformationSale();
+    await recommendationProvider.getRecommendations();
+    await transactionProvider.getSalesCount();
   }
 
   Future<void> _refreshData() async {
