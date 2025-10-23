@@ -11,6 +11,39 @@ import 'auth_local_datasource.dart';
 
 class ProfileBusinessRemoteDatasource {
   // Get business categories
+  Future<Either<String, BusinessProfileResponseModel>>
+  getDataBusinessProfile() async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final response = await http.get(
+      Uri.parse('${Variables.baseUrl}/profile'),
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Business Profile Response status: ${response.statusCode}');
+    debugPrint('Business Profile Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      try {
+        final businessProfileResponse = BusinessProfileResponseModel.fromJson(
+          response.body,
+        );
+        debugPrint('Business profile successfully: $businessProfileResponse');
+        return Right(businessProfileResponse);
+      } catch (e) {
+        debugPrint('Error parsing business categories response: $e');
+        return Left('Error parsing response: $e');
+      }
+    } else {
+      debugPrint('Error retrieving business categories: ${response.body}');
+      return Left(response.body);
+    }
+  }
+
+  // Get business categories
   Future<Either<String, BusinessCategoryResponseModel>>
   getBusinessCategories() async {
     final authData = await AuthLocalDatasource().getAuthData();

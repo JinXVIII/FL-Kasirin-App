@@ -29,46 +29,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  BusinessCategoryModel? _selectedBusinessCategory;
-  BusinessTypeModel? _selectedBusinessType;
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _clearState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
-  }
-
-  void _clearState() {
-    setState(() {
-      _businessNameController.clear();
-      _addressController.clear();
-      _phoneController.clear();
-      _selectedBusinessCategory = null;
-      _selectedBusinessType = null;
-      _isLoading = true;
-    });
-
-    // Clear provider data
-    final provider = context.read<ProfileBusinessProvider>();
-    provider.clearAllErrors();
-    provider.clearBusinessCategories();
-    provider.clearBusinessTypes();
   }
 
   void _loadInitialData() async {
     final provider = context.read<ProfileBusinessProvider>();
 
     await provider.getBusinessCategories();
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    provider.setLoadingInitial(false);
   }
 
   @override
@@ -80,6 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _validateAndSave() {
+    final provider = context.read<ProfileBusinessProvider>();
+
     // Manual validation since CustomTextField doesn't have validator
     if (_businessNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    if (_selectedBusinessCategory == null) {
+    if (provider.selectedBusinessCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Kategori usaha harus dipilih'),
@@ -101,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    if (_selectedBusinessType == null) {
+    if (provider.selectedBusinessType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Jenis usaha harus dipilih'),
@@ -130,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Create request model
     final requestModel = ProfileBusinessRequestModel(
       storeName: _businessNameController.text,
-      businessTypeId: _selectedBusinessType!.id,
+      businessTypeId: provider.selectedBusinessType!.id,
       address: _addressController.text,
       phoneNumber: _phoneController.text.isNotEmpty
           ? _phoneController.text
@@ -178,302 +153,317 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 20),
+        child: Consumer<ProfileBusinessProvider>(
+          builder: (context, provider, child) {
+            return provider.isLoadingInitial
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 20),
 
-                      // Business name field
-                      CustomTextField(
-                        controller: _businessNameController,
-                        label: 'Nama Usaha',
-                      ),
-                      const SizedBox(height: 20),
+                          // Business name field
+                          CustomTextField(
+                            controller: _businessNameController,
+                            label: 'Nama Usaha',
+                          ),
+                          const SizedBox(height: 20),
 
-                      // Business category dropdown
-                      Consumer<ProfileBusinessProvider>(
-                        builder: (context, provider, child) {
-                          if (provider.isLoadingCategories) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Kategori Usaha',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                const SizedBox(height: 6.0),
-                                Shimmer(
-                                  duration: const Duration(seconds: 2),
-                                  interval: const Duration(seconds: 1),
-                                  color: Colors.grey.shade300,
-                                  colorOpacity: 0.3,
-                                  enabled: true,
-                                  direction: ShimmerDirection.fromLTRB(),
-                                  child: Container(
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade300,
-                                      borderRadius: BorderRadius.circular(8),
+                          // Business category dropdown
+                          Consumer<ProfileBusinessProvider>(
+                            builder: (context, provider, child) {
+                              if (provider.isLoadingCategories) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Kategori Usaha',
+                                      style: AppTextStyles.bodyMedium,
                                     ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
+                                    const SizedBox(height: 6.0),
+                                    Shimmer(
+                                      duration: const Duration(seconds: 2),
+                                      interval: const Duration(seconds: 1),
+                                      color: Colors.grey.shade300,
+                                      colorOpacity: 0.3,
+                                      enabled: true,
+                                      direction: ShimmerDirection.fromLTRB(),
+                                      child: Container(
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
 
-                          if (provider.categoriesError != null) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Kategori Usaha',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: AppColors.red),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Gagal memuat kategori',
-                                      style: AppTextStyles.bodySmall.copyWith(
+                              if (provider.categoriesError != null) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Kategori Usaha',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: AppColors.red,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'Gagal memuat kategori',
+                                          style: AppTextStyles.bodySmall
+                                              .copyWith(color: AppColors.red),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      provider.categoriesError!,
+                                      style: AppTextStyles.caption.copyWith(
                                         color: AppColors.red,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  provider.categoriesError!,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.red,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-
-                          return CustomDropdown<BusinessCategoryModel>(
-                            value: _selectedBusinessCategory,
-                            items: provider.businessCategories,
-                            label: 'Kategori Usaha',
-                            hintText: 'Pilih Kategori Usaha',
-                            enabled: !provider.isLoadingCategories,
-                            onChanged: (BusinessCategoryModel? newValue) {
-                              setState(() {
-                                _selectedBusinessCategory = newValue;
-                                _selectedBusinessType =
-                                    null; // Reset business type when category changes
-                              });
-                              // Load business types for selected category
-                              if (newValue != null) {
-                                provider.getBusinessTypesByCategory(
-                                  newValue.id,
+                                  ],
                                 );
                               }
-                            },
-                            itemBuilder: (context, category) {
-                              return Text(
-                                category.name,
-                                style: AppTextStyles.bodyMedium,
+
+                              return CustomDropdown<BusinessCategoryModel>(
+                                value: provider.selectedBusinessCategory,
+                                items: provider.businessCategories,
+                                label: 'Kategori Usaha',
+                                hintText: 'Pilih Kategori Usaha',
+                                enabled: !provider.isLoadingCategories,
+                                onChanged: (BusinessCategoryModel? newValue) {
+                                  // Load business types for selected category
+                                  if (newValue != null) {
+                                    provider.getBusinessTypesByCategory(
+                                      newValue.id,
+                                    );
+                                  }
+                                  provider.setSelectedBusinessCategory(
+                                    newValue,
+                                  );
+                                  provider.setSelectedBusinessType(
+                                    null,
+                                  ); // Reset business type when category changes
+                                },
+                                itemBuilder: (context, category) {
+                                  return Text(
+                                    category.name,
+                                    style: AppTextStyles.bodyMedium,
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
+                          ),
+                          const SizedBox(height: 20),
 
-                      // Business type dropdown
-                      Consumer<ProfileBusinessProvider>(
-                        builder: (context, provider, child) {
-                          // Show loading state when categories are loading
-                          if (provider.isLoadingCategories) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Jenis Usaha',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                const SizedBox(height: 6.0),
-                                CustomDropdown<BusinessTypeModel>(
+                          // Business type dropdown
+                          Consumer<ProfileBusinessProvider>(
+                            builder: (context, provider, child) {
+                              // Show loading state when categories are loading
+                              if (provider.isLoadingCategories) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Jenis Usaha',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 6.0),
+                                    CustomDropdown<BusinessTypeModel>(
+                                      value: null,
+                                      items: [],
+                                      label: 'Jenis Usaha',
+                                      hintText:
+                                          'Pilih kategori terlebih dahulu',
+                                      enabled: false,
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              // Show loading state when business types are loading
+                              if (provider.isLoadingTypes) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Jenis Usaha',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 6.0),
+                                    Shimmer(
+                                      duration: const Duration(seconds: 2),
+                                      interval: const Duration(seconds: 1),
+                                      color: Colors.grey.shade100,
+                                      colorOpacity: 0.3,
+                                      enabled: true,
+                                      direction: ShimmerDirection.fromLTRB(),
+                                      child: Container(
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: AppColors.grey,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              // Show error state
+                              if (provider.typesError != null) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Jenis Usaha',
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: AppColors.red,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'Gagal memuat jenis usaha',
+                                          style: AppTextStyles.bodySmall
+                                              .copyWith(color: AppColors.red),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      provider.typesError!,
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.red,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              // Show disabled state when no category is selected
+                              if (provider.selectedBusinessCategory == null) {
+                                return CustomDropdown<BusinessTypeModel>(
                                   value: null,
                                   items: [],
                                   label: 'Jenis Usaha',
                                   hintText: 'Pilih kategori terlebih dahulu',
                                   enabled: false,
-                                ),
-                              ],
-                            );
-                          }
+                                );
+                              }
 
-                          // Show loading state when business types are loading
-                          if (provider.isLoadingTypes) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Jenis Usaha',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                const SizedBox(height: 6.0),
-                                Shimmer(
-                                  duration: const Duration(seconds: 2),
-                                  interval: const Duration(seconds: 1),
-                                  color: Colors.grey.shade100,
-                                  colorOpacity: 0.3,
-                                  enabled: true,
-                                  direction: ShimmerDirection.fromLTRB(),
-                                  child: Container(
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: AppColors.grey),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-
-                          // Show error state
-                          if (provider.typesError != null) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Jenis Usaha',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: AppColors.red),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Gagal memuat jenis usaha',
-                                      style: AppTextStyles.bodySmall.copyWith(
-                                        color: AppColors.red,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  provider.typesError!,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.red,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-
-                          // Show disabled state when no category is selected
-                          if (_selectedBusinessCategory == null) {
-                            return CustomDropdown<BusinessTypeModel>(
-                              value: null,
-                              items: [],
-                              label: 'Jenis Usaha',
-                              hintText: 'Pilih kategori terlebih dahulu',
-                              enabled: false,
-                            );
-                          }
-
-                          // Show enabled state with business types
-                          return CustomDropdown<BusinessTypeModel>(
-                            value: _selectedBusinessType,
-                            items: provider.businessTypes,
-                            label: 'Jenis Usaha',
-                            hintText: 'Pilih Jenis Usaha',
-                            enabled: !provider.isLoadingTypes,
-                            onChanged: (BusinessTypeModel? newValue) {
-                              setState(() {
-                                _selectedBusinessType = newValue;
-                              });
-                            },
-                            itemBuilder: (context, type) {
-                              return Text(
-                                type.name,
-                                style: AppTextStyles.bodyMedium,
+                              // Show enabled state with business types
+                              return CustomDropdown<BusinessTypeModel>(
+                                value: provider.selectedBusinessType,
+                                items: provider.businessTypes,
+                                label: 'Jenis Usaha',
+                                hintText: 'Pilih Jenis Usaha',
+                                enabled: !provider.isLoadingTypes,
+                                onChanged: (BusinessTypeModel? newValue) {
+                                  provider.setSelectedBusinessType(newValue);
+                                },
+                                itemBuilder: (context, type) {
+                                  return Text(
+                                    type.name,
+                                    style: AppTextStyles.bodyMedium,
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Address field with multiline support
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Alamat Usaha', style: AppTextStyles.bodyMedium),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _addressController,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              hintText: 'Masukkan alamat usaha',
-                              hintStyle: AppTextStyles.caption.copyWith(
-                                fontSize: 14,
-                              ),
-                            ),
                           ),
+                          const SizedBox(height: 20),
+
+                          // Address field with multiline support
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Alamat Usaha',
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: _addressController,
+                                maxLines: 3,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  hintText: 'Masukkan alamat usaha',
+                                  hintStyle: AppTextStyles.caption.copyWith(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Phone field (optional)
+                          CustomTextField(
+                            controller: _phoneController,
+                            label: 'No Handphone (Opsional)',
+                            keyboardType: TextInputType.phone,
+                          ),
+                          const SizedBox(height: 40),
+
+                          // Save button
+                          Consumer<ProfileBusinessProvider>(
+                            builder: (context, provider, child) {
+                              return CustomButton.filled(
+                                onPressed: provider.isSubmitting
+                                    ? () {}
+                                    : _validateAndSave,
+                                label: provider.isSubmitting
+                                    ? 'Menyimpan...'
+                                    : 'Simpan Profil',
+                                disabled: provider.isSubmitting,
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 20),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
-                      // Phone field (optional)
-                      CustomTextField(
-                        controller: _phoneController,
-                        label: 'No Handphone (Opsional)',
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 40),
-
-                      // Save button
-                      Consumer<ProfileBusinessProvider>(
-                        builder: (context, provider, child) {
-                          return CustomButton.filled(
-                            onPressed: provider.isSubmitting
-                                ? () {}
-                                : _validateAndSave,
-                            label: provider.isSubmitting
-                                ? 'Menyimpan...'
-                                : 'Simpan Profil',
-                            disabled: provider.isSubmitting,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
+                  );
+          },
+        ),
       ),
     );
   }

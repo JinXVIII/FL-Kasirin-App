@@ -14,12 +14,15 @@ class ProfileBusinessProvider extends ChangeNotifier {
   bool _isLoadingCategories = false;
   bool _isLoadingTypes = false;
   bool _isSubmitting = false;
+  bool _isLoadingInitial = false;
   String? _errorMessage;
   String? _categoriesError;
   String? _typesError;
   List<BusinessCategoryModel> _businessCategories = [];
   List<BusinessTypeModel> _businessTypes = [];
   BusinessProfileResponseModel? _profileData;
+  BusinessCategoryModel? _selectedBusinessCategory;
+  BusinessTypeModel? _selectedBusinessType;
 
   ProfileBusinessProvider(this._remoteDatasource);
 
@@ -27,12 +30,40 @@ class ProfileBusinessProvider extends ChangeNotifier {
   bool get isLoadingCategories => _isLoadingCategories;
   bool get isLoadingTypes => _isLoadingTypes;
   bool get isSubmitting => _isSubmitting;
+  bool get isLoadingInitial => _isLoadingInitial;
   String? get errorMessage => _errorMessage;
   String? get categoriesError => _categoriesError;
   String? get typesError => _typesError;
   List<BusinessCategoryModel> get businessCategories => _businessCategories;
   List<BusinessTypeModel> get businessTypes => _businessTypes;
   BusinessProfileResponseModel? get profileData => _profileData;
+  BusinessCategoryModel? get selectedBusinessCategory =>
+      _selectedBusinessCategory;
+  BusinessTypeModel? get selectedBusinessType => _selectedBusinessType;
+
+  // Get business profile
+  Future<bool> getBusinessProfile() async {
+    _isLoadingInitial = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await _remoteDatasource.getDataBusinessProfile();
+
+    return result.fold(
+      (error) {
+        _errorMessage = error;
+        _isLoadingInitial = false;
+        notifyListeners();
+        return false;
+      },
+      (response) {
+        _profileData = response;
+        _isLoadingInitial = false;
+        notifyListeners();
+        return true;
+      },
+    );
+  }
 
   // Get business categories
   Future<bool> getBusinessCategories() async {
@@ -102,6 +133,21 @@ class ProfileBusinessProvider extends ChangeNotifier {
   }
 
   // Helper methods
+  void setSelectedBusinessCategory(BusinessCategoryModel? category) {
+    _selectedBusinessCategory = category;
+    notifyListeners();
+  }
+
+  void setSelectedBusinessType(BusinessTypeModel? type) {
+    _selectedBusinessType = type;
+    notifyListeners();
+  }
+
+  void setLoadingInitial(bool loading) {
+    _isLoadingInitial = loading;
+    notifyListeners();
+  }
+
   void _setLoadingCategories(bool value) {
     _isLoadingCategories = value;
     notifyListeners();
