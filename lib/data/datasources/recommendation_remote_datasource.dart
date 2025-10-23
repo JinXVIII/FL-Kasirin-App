@@ -35,6 +35,24 @@ class RecommendationRemoteDatasource {
         debugPrint('Error parsing response: $e');
         return Left('Error parsing response: $e');
       }
+    } else if (response.statusCode == 404) {
+      // Handle case when user has no transaction history
+      debugPrint('No recommendations available for new user');
+      // Return a default empty recommendation response
+      final emptyResponse = RecommendationResponseModel(
+        success: false,
+        message:
+            'No transactions found for this user. Cannot generate recommendations without transaction history.',
+        data: Data(
+          recommendations: [],
+          totalTransactions: 0,
+          totalProducts: 0,
+          targetMonth: '',
+          monthRange: MonthRange(start: '', end: ''),
+          modelVersion: '',
+        ),
+      );
+      return Right(emptyResponse);
     } else {
       debugPrint('Error response: ${response.body}');
       return const Left('Terjadi kesalahan saat mengambil data produk');

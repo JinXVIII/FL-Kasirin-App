@@ -160,6 +160,7 @@ class _BestProfitProductsState extends State<BestProfitProducts> {
 
             if (recommendations.isEmpty) {
               return Container(
+                padding: EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),
