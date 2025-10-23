@@ -28,6 +28,23 @@ class AuthLocalDatasource {
     return data?.token;
   }
 
+  Future<bool?> getStatus() async {
+    final data = await getAuthData();
+    return data?.hasBusinessProfile;
+  }
+
+  Future<void> updateBusinessProfileStatus(bool hasProfile) async {
+    final data = await getAuthData();
+    if (data != null) {
+      final updatedData = AuthResponseModel(
+        user: data.user,
+        token: data.token,
+        hasBusinessProfile: hasProfile,
+      );
+      await saveAuthData(updatedData);
+    }
+  }
+
   Future<bool> isAuth() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('auth_data');

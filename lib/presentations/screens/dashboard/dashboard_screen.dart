@@ -10,6 +10,8 @@ import '../../../presentations/providers/auth_provider.dart';
 import '../../../presentations/providers/recommendation_provider.dart';
 import '../../../presentations/providers/transaction_provider.dart';
 
+import '../../../data/datasources/auth_local_datasource.dart';
+
 import '../../widgets/app_drawer.dart';
 import 'widgets/financial_information_card.dart';
 import 'widgets/menu_item_card.dart';
@@ -25,7 +27,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final bool _isProfileCompleted = false;
+  bool _isProfileCompleted = false;
   bool _isLoading = true;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -43,7 +45,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _checkProfileStatus() async {
+    final authLocalDatasource = AuthLocalDatasource();
+    final hasBusinessProfile = await authLocalDatasource.getStatus();
+
     setState(() {
+      _isProfileCompleted = hasBusinessProfile ?? false;
       _isLoading = false;
     });
 
@@ -112,7 +118,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context.pushNamed(RouteConstants.salesHistory);
         },
       },
-      {"icon": Icons.bar_chart_outlined, "label": "Laporan", "onTap": () {}},
+      {
+        "icon": Icons.bar_chart_outlined,
+        "label": "Laporan",
+        "isPro": true,
+        "onTap": () {},
+      },
       {
         "icon": Icons.people_outline,
         "label": "Karyawan",

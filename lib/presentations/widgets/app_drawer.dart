@@ -181,19 +181,19 @@ class AppDrawer extends StatelessWidget {
         'icon': Icons.dashboard_outlined,
         'title': 'Dashboard',
         'route': '/dashboard',
-        'onTap': () {}, // Already on dashboard
+        'onTap': () {},
       },
       {
-        'icon': Icons.settings_outlined,
-        'title': 'Pengaturan',
+        'icon': Icons.account_circle_outlined,
+        'title': 'Profile',
         'route': '/edit-profile',
         'onTap': () => context.pushNamed(RouteConstants.editProfile),
       },
       {
-        'icon': Icons.star_outlined,
+        'icon': Icons.star_border_outlined,
         'title': 'Fitur PRO',
         'route': '/pro-features',
-        'onTap': () {}, // TODO: Navigate to PRO features screen
+        'onTap': () {},
       },
     ];
 
