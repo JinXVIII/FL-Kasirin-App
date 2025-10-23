@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/themes/text_styles.dart';
 
+import '../../../data/models/business_category_model.dart';
+import '../../../data/models/business_type_model.dart';
+import '../../../data/models/request/profile_business_request_model.dart';
+
+import '../../providers/profile_business_provider.dart';
+
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/custom_dropdown.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,61 +29,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  String? _selectedBusinessCategory;
-  String? _selectedBusinessType;
-  bool _isLoading = false;
+  BusinessCategoryModel? _selectedBusinessCategory;
+  BusinessTypeModel? _selectedBusinessType;
+  bool _isLoading = true;
 
-  // Business categories and their types
-  final Map<String, List<String>> _businessCategories = {
-    'Makanan & Minuman': [
-      'Restoran',
-      'Kafe',
-      'Warung Makan',
-      'Kedai Kopi',
-      'Jus & Smoothie',
-      'Bakery & Kue',
-      'Catering',
-      'Food Truck',
-    ],
-    'Retail': [
-      'Minimarket',
-      'Toko Kelontong',
-      'Fashion & Aksesoris',
-      'Elektronik',
-      'Toko Buku',
-      'Toko Mainan',
-      'Toko Olahraga',
-      'Toko Kosmetik',
-    ],
-    'Jasa': [
-      'Salon & Kecantikan',
-      'Bengkel',
-      'Laundry',
-      'Kursus & Bimbingan',
-      'Fotografi',
-      'Event Organizer',
-      'Tour & Travel',
-      'Jasa Konsultasi',
-    ],
-    'Kesehatan': [
-      'Apotek',
-      'Klinik',
-      'Toko Alat Kesehatan',
-      'Herbal & Suplemen',
-      'Praktik Dokter',
-      'Fisioterapi',
-      'Klinik Gigi',
-      'Optik',
-    ],
-    'Lainnya': [
-      'Toko By-By',
-      'Toko Pertanian',
-      'Toko Peternakan',
-      'Distributor',
-      'Pabrik',
-      'Lainnya',
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _clearState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  void _clearState() {
+    setState(() {
+      _businessNameController.clear();
+      _addressController.clear();
+      _phoneController.clear();
+      _selectedBusinessCategory = null;
+      _selectedBusinessType = null;
+      _isLoading = true;
+    });
+
+    // Clear provider data
+    final provider = context.read<ProfileBusinessProvider>();
+    provider.clearAllErrors();
+    provider.clearBusinessCategories();
+    provider.clearBusinessTypes();
+  }
+
+  void _loadInitialData() async {
+    final provider = context.read<ProfileBusinessProvider>();
+
+    await provider.getBusinessCategories();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -130,29 +125,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _saveProfile() async {
-    setState(() {
-      _isLoading = true;
-    });
+    final provider = context.read<ProfileBusinessProvider>();
 
-    // Simulate saving profile
-    await Future.delayed(const Duration(seconds: 2));
+    // Create request model
+    final requestModel = ProfileBusinessRequestModel(
+      storeName: _businessNameController.text,
+      businessTypeId: _selectedBusinessType!.id,
+      address: _addressController.text,
+      phoneNumber: _phoneController.text.isNotEmpty
+          ? _phoneController.text
+          : null,
+    );
 
-    setState(() {
-      _isLoading = false;
-    });
+    final success = await provider.completeStoreProfile(requestModel);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profil toko berhasil disimpan!'),
-          backgroundColor: AppColors.green,
-        ),
-      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil toko berhasil disimpan!'),
+            backgroundColor: AppColors.green,
+          ),
+        );
 
-      // Mark profile as completed
-      // This would typically save to a database or local storage
-      // For now, we'll just navigate back to dashboard
-      context.pushReplacement('/dashboard');
+        // Navigate back to dashboard
+        context.pushReplacement('/dashboard');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(provider.errorMessage ?? 'Gagal menyimpan profil'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -173,171 +178,302 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 20),
 
-                // Business name field
-                CustomTextField(
-                  controller: _businessNameController,
-                  label: 'Nama Usaha',
-                ),
-                const SizedBox(height: 20),
-
-                // Business category dropdown
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Kategori Usaha', style: AppTextStyles.bodyMedium),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
+                      // Business name field
+                      CustomTextField(
+                        controller: _businessNameController,
+                        label: 'Nama Usaha',
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          hint: Text(
-                            'Pilih Kategori Usaha',
-                            style: AppTextStyles.caption.copyWith(fontSize: 14),
-                          ),
-                          value: _selectedBusinessCategory,
-                          isExpanded: true,
-                          items: _businessCategories.keys.map((
-                            String category,
-                          ) {
-                            return DropdownMenuItem<String>(
-                              value: category,
-                              child: Text(
-                                category,
-                                style: AppTextStyles.bodyMedium,
-                              ),
+                      const SizedBox(height: 20),
+
+                      // Business category dropdown
+                      Consumer<ProfileBusinessProvider>(
+                        builder: (context, provider, child) {
+                          if (provider.isLoadingCategories) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Kategori Usaha',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 6.0),
+                                Shimmer(
+                                  duration: const Duration(seconds: 2),
+                                  interval: const Duration(seconds: 1),
+                                  color: Colors.grey.shade300,
+                                  colorOpacity: 0.3,
+                                  enabled: true,
+                                  direction: ShimmerDirection.fromLTRB(),
+                                  child: Container(
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedBusinessCategory = newValue;
-                              _selectedBusinessType =
-                                  null; // Reset business type when category changes
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                          }
 
-                // Business type dropdown (always visible, but disabled when no category selected)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Jenis Usaha', style: AppTextStyles.bodyMedium),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _selectedBusinessCategory == null
-                              ? AppColors.disabled
-                              : Colors.grey,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        color: _selectedBusinessCategory == null
-                            ? AppColors.disabled.withValues(alpha: 0.1)
-                            : Colors.transparent,
+                          if (provider.categoriesError != null) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Kategori Usaha',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: AppColors.red),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Gagal memuat kategori',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  provider.categoriesError!,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.red,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          return CustomDropdown<BusinessCategoryModel>(
+                            value: _selectedBusinessCategory,
+                            items: provider.businessCategories,
+                            label: 'Kategori Usaha',
+                            hintText: 'Pilih Kategori Usaha',
+                            enabled: !provider.isLoadingCategories,
+                            onChanged: (BusinessCategoryModel? newValue) {
+                              setState(() {
+                                _selectedBusinessCategory = newValue;
+                                _selectedBusinessType =
+                                    null; // Reset business type when category changes
+                              });
+                              // Load business types for selected category
+                              if (newValue != null) {
+                                provider.getBusinessTypesByCategory(
+                                  newValue.id,
+                                );
+                              }
+                            },
+                            itemBuilder: (context, category) {
+                              return Text(
+                                category.name,
+                                style: AppTextStyles.bodyMedium,
+                              );
+                            },
+                          );
+                        },
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          hint: Text(
-                            'Pilih Jenis Usaha',
-                            style: AppTextStyles.caption.copyWith(
-                              fontSize: 14,
-                              color: _selectedBusinessCategory == null
-                                  ? AppColors.disabled
-                                  : Colors.grey,
+                      const SizedBox(height: 20),
+
+                      // Business type dropdown
+                      Consumer<ProfileBusinessProvider>(
+                        builder: (context, provider, child) {
+                          // Show loading state when categories are loading
+                          if (provider.isLoadingCategories) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Jenis Usaha',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 6.0),
+                                CustomDropdown<BusinessTypeModel>(
+                                  value: null,
+                                  items: [],
+                                  label: 'Jenis Usaha',
+                                  hintText: 'Pilih kategori terlebih dahulu',
+                                  enabled: false,
+                                ),
+                              ],
+                            );
+                          }
+
+                          // Show loading state when business types are loading
+                          if (provider.isLoadingTypes) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Jenis Usaha',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 6.0),
+                                Shimmer(
+                                  duration: const Duration(seconds: 2),
+                                  interval: const Duration(seconds: 1),
+                                  color: Colors.grey.shade100,
+                                  colorOpacity: 0.3,
+                                  enabled: true,
+                                  direction: ShimmerDirection.fromLTRB(),
+                                  child: Container(
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppColors.grey),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          // Show error state
+                          if (provider.typesError != null) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Jenis Usaha',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: AppColors.red),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Gagal memuat jenis usaha',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  provider.typesError!,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.red,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          // Show disabled state when no category is selected
+                          if (_selectedBusinessCategory == null) {
+                            return CustomDropdown<BusinessTypeModel>(
+                              value: null,
+                              items: [],
+                              label: 'Jenis Usaha',
+                              hintText: 'Pilih kategori terlebih dahulu',
+                              enabled: false,
+                            );
+                          }
+
+                          // Show enabled state with business types
+                          return CustomDropdown<BusinessTypeModel>(
+                            value: _selectedBusinessType,
+                            items: provider.businessTypes,
+                            label: 'Jenis Usaha',
+                            hintText: 'Pilih Jenis Usaha',
+                            enabled: !provider.isLoadingTypes,
+                            onChanged: (BusinessTypeModel? newValue) {
+                              setState(() {
+                                _selectedBusinessType = newValue;
+                              });
+                            },
+                            itemBuilder: (context, type) {
+                              return Text(
+                                type.name,
+                                style: AppTextStyles.bodyMedium,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Address field with multiline support
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Alamat Usaha', style: AppTextStyles.bodyMedium),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: _addressController,
+                            maxLines: 3,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              hintText: 'Masukkan alamat usaha',
+                              hintStyle: AppTextStyles.caption.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                          value: _selectedBusinessType,
-                          isExpanded: true,
-                          items: _selectedBusinessCategory != null
-                              ? _businessCategories[_selectedBusinessCategory]!
-                                    .map((String type) {
-                                      return DropdownMenuItem<String>(
-                                        value: type,
-                                        child: Text(
-                                          type,
-                                          style: AppTextStyles.bodyMedium,
-                                        ),
-                                      );
-                                    })
-                                    .toList()
-                              : [],
-                          onChanged: _selectedBusinessCategory != null
-                              ? (String? newValue) {
-                                  setState(() {
-                                    _selectedBusinessType = newValue;
-                                  });
-                                }
-                              : null, // Disable dropdown when no category is selected
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                // Address field with multiline support
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Alamat Usaha', style: AppTextStyles.bodyMedium),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _addressController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        hintText: 'Masukkan alamat usaha',
-                        hintStyle: AppTextStyles.caption.copyWith(fontSize: 14),
+                      // Phone field (optional)
+                      CustomTextField(
+                        controller: _phoneController,
+                        label: 'No Handphone (Opsional)',
+                        keyboardType: TextInputType.phone,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                      const SizedBox(height: 40),
 
-                // Phone field (optional)
-                CustomTextField(
-                  controller: _phoneController,
-                  label: 'No Handphone (Opsional)',
-                  keyboardType: TextInputType.phone,
+                      // Save button
+                      Consumer<ProfileBusinessProvider>(
+                        builder: (context, provider, child) {
+                          return CustomButton.filled(
+                            onPressed: provider.isSubmitting
+                                ? () {}
+                                : _validateAndSave,
+                            label: provider.isSubmitting
+                                ? 'Menyimpan...'
+                                : 'Simpan Profil',
+                            disabled: provider.isSubmitting,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 40),
-
-                // Save button
-                CustomButton.filled(
-                  onPressed: _isLoading ? () {} : _validateAndSave,
-                  label: _isLoading ? 'Menyimpan...' : 'Simpan Profil',
-                  disabled: _isLoading,
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

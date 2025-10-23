@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'business_category_model.dart';
+
 class BusinessTypeModel {
   final int id;
   final int businessCategoryId;
   final String name;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final BusinessCategoryModel? businessCategory;
 
   BusinessTypeModel({
     required this.id,
@@ -13,6 +16,7 @@ class BusinessTypeModel {
     required this.name,
     this.createdAt,
     this.updatedAt,
+    this.businessCategory,
   });
 
   factory BusinessTypeModel.fromJson(String str) =>
@@ -31,6 +35,9 @@ class BusinessTypeModel {
         updatedAt: json["updated_at"] != null
             ? DateTime.parse(json["updated_at"])
             : null,
+        businessCategory: json["business_category"] != null
+            ? BusinessCategoryModel.fromMap(json["business_category"])
+            : null,
       );
 
   Map<String, dynamic> toMap() => {
@@ -39,5 +46,6 @@ class BusinessTypeModel {
     "name": name,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
+    "business_category": businessCategory?.toMap(),
   };
 }

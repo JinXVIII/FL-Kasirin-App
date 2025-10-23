@@ -5,12 +5,14 @@ import 'package:provider/provider.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/auth_local_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
+import 'data/datasources/profile_business_remote_datasource.dart';
 import 'data/datasources/transaction_remote_datasource.dart';
 import 'data/datasources/recommendation_remote_datasource.dart';
 
 import 'presentations/providers/auth_provider.dart';
 import 'presentations/providers/cart_provider.dart';
 import 'presentations/providers/product_provider.dart';
+import 'presentations/providers/profile_business_provider.dart';
 import 'presentations/providers/transaction_provider.dart';
 import 'presentations/providers/recommendation_provider.dart';
 
@@ -35,10 +37,14 @@ class MyApp extends StatelessWidget {
             authLocalDatasource: AuthLocalDatasource(),
           ),
         ),
-        ChangeNotifierProvider(create: (context) => CartProvider()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProfileBusinessProvider(ProfileBusinessRemoteDatasource()),
+        ),
         ChangeNotifierProvider(
           create: (context) => ProductProvider(ProductRemoteDatasource()),
         ),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(
           create: (context) =>
               TransactionProvider(TransactionRemoteDatasource()),
