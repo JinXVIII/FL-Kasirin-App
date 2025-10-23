@@ -176,16 +176,15 @@ class _FinancialInformationCardState extends State<FinancialInformationCard> {
     );
   }
 
-  String _formatCurrency(String amount) {
-    // Remove any non-digit characters
-    final cleanAmount = amount.replaceAll(RegExp(r'[^0-9]'), '');
+  String _formatCurrency(dynamic amount) {
+    final amountStr = amount.toString();
+
+    final cleanAmount = amountStr.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (cleanAmount.isEmpty) return '0';
 
-    // Parse as integer
     final value = int.parse(cleanAmount);
 
-    // Format with thousand separators
     return value.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',

@@ -43,7 +43,7 @@ class Data {
 
 class StatisticModel {
   final int transactions;
-  final String revenue;
+  final int revenue;
 
   StatisticModel({required this.transactions, required this.revenue});
 
