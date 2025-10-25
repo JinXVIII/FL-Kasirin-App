@@ -36,6 +36,7 @@ class CustomTextField extends StatelessWidget {
           onChanged: onChanged,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          style: AppTextStyles.bodyMedium,
           decoration: InputDecoration(
             suffixIcon: suffixIcon,
             suffixIconColor: Colors.grey,

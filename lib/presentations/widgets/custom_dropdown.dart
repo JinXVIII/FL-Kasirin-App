@@ -40,6 +40,7 @@ class CustomDropdown<T> extends StatelessWidget {
             ),
             initialValue: value,
             onChanged: enabled ? onChanged : null,
+            style: AppTextStyles.bodyMedium,
             items: items.map((T item) {
               return DropdownMenuItem<T>(
                 value: item,
