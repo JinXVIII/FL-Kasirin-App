@@ -1,5 +1,5 @@
 class Variables {
-  static const String baseUrl = 'https://kasirin.jinproject.tech/api';
+  static const String baseUrl = 'https://jinproject.tech/api';
   static const String baseUrlImage =
-      'https://kasirin.jinproject.tech/storage/uploads/products';
+      'https://jinproject.tech/storage/uploads/products';
 }
