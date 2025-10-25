@@ -33,6 +33,10 @@ class ProductProvider extends ChangeNotifier {
   bool _isEditingProduct = false;
   String? _editProductError;
 
+  // Delete product states
+  bool _isDeletingProduct = false;
+  String? _deleteProductError;
+
   // Category states
   List<ProductTypeModel> _categories = [];
   bool _isLoadingCategories = false;
@@ -61,6 +65,10 @@ class ProductProvider extends ChangeNotifier {
   // Edit product getters
   bool get isEditingProduct => _isEditingProduct;
   String? get editProductError => _editProductError;
+
+  // Delete product getters
+  bool get isDeletingProduct => _isDeletingProduct;
+  String? get deleteProductError => _deleteProductError;
 
   // Category getters
   List<ProductTypeModel> get categories => _categories;
@@ -162,6 +170,29 @@ class ProductProvider extends ChangeNotifier {
     );
   }
 
+  // Delete product method
+  Future<bool> deleteProduct(int productId) async {
+    _setDeletingProduct(true);
+    _deleteProductError = null;
+
+    final Either<String, String> result = await _remoteDatasource.deleteProduct(
+      productId,
+    );
+
+    return result.fold(
+      (error) {
+        _deleteProductError = error;
+        _setDeletingProduct(false);
+        return false;
+      },
+      (response) {
+        _setDeletingProduct(false);
+        getAllProducts();
+        return true;
+      },
+    );
+  }
+
   // Category methods
   Future<void> getAllCategories() async {
     _setLoadingCategories(true);
@@ -244,6 +275,11 @@ class ProductProvider extends ChangeNotifier {
 
   void _setEditingProduct(bool value) {
     _isEditingProduct = value;
+    _safeNotifyListeners();
+  }
+
+  void _setDeletingProduct(bool value) {
+    _isDeletingProduct = value;
     _safeNotifyListeners();
   }
 

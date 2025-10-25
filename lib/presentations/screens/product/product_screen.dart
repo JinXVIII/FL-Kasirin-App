@@ -62,13 +62,6 @@ class _ProductScreenState extends State<ProductScreen> {
             icon: const Icon(Icons.add),
             tooltip: 'Tambah Produk',
           ),
-          // IconButton(
-          //   onPressed: () {
-          //     Provider.of<ProductProvider>(context, listen: false).refresh();
-          //   },
-          //   icon: const Icon(Icons.refresh),
-          //   tooltip: 'Refresh',
-          // ),
         ],
       ),
       backgroundColor: AppColors.body,
@@ -226,18 +219,53 @@ class _ProductScreenState extends State<ProductScreen> {
               },
               child: const Text('Batal'),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // TODO: Implement delete functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fitur hapus produk akan segera hadir'),
-                    backgroundColor: AppColors.grey,
-                  ),
+            Consumer<ProductProvider>(
+              builder: (context, provider, child) {
+                return TextButton(
+                  onPressed: provider.isDeletingProduct
+                      ? null
+                      : () async {
+                          Navigator.of(context).pop();
+
+                          // Call delete function from provider
+                          final success = await provider.deleteProduct(
+                            product.id,
+                          );
+
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Produk berhasil dihapus'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  provider.deleteProductError ??
+                                      'Gagal menghapus produk',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                  child: provider.isDeletingProduct
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.red,
+                          ),
+                        )
+                      : const Text(
+                          'Hapus',
+                          style: TextStyle(color: Colors.red),
+                        ),
                 );
               },
-              child: const Text('Hapus', style: TextStyle(color: Colors.red)),
             ),
           ],
         );

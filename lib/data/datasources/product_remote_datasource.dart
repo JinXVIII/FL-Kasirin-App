@@ -183,4 +183,26 @@ class ProductRemoteDatasource {
       return left(body);
     }
   }
+
+  Future<Either<String, String>> deleteProduct(int productId) async {
+    final authData = await AuthLocalDatasource().getAuthData();
+
+    final response = await http.delete(
+      Uri.parse('${Variables.baseUrl}/products/$productId'),
+      headers: {
+        'Authorization': 'Bearer ${authData?.token}',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      return const Right('Produk berhasil dihapus');
+    } else {
+      debugPrint('Error response: ${response.body}');
+      return Left('Gagal menghapus produk: ${response.body}');
+    }
+  }
 }
