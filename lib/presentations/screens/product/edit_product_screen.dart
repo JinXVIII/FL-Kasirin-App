@@ -14,6 +14,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/image_picker_widget.dart';
+import '../../widgets/status_dialog.dart';
 
 class EditProductScreen extends StatefulWidget {
   final int productId;
@@ -82,28 +83,37 @@ class _EditProductScreenState extends State<EditProductScreen> {
         });
       } else {
         _showError('Produk tidak ditemukan');
-        context.pop();
       }
     } else if (mounted) {
       _showError(
         productProvider.detailProductError ?? 'Gagal memuat data produk',
       );
-      context.pop();
     }
   }
 
   void _showError(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      StatusDialogs.showFailed(
+        context,
+        title: 'Error!',
+        message: message,
+        okButtonText: 'Tutup',
       );
     }
   }
 
   void _showSuccess(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.green),
+      StatusDialogs.showSuccess(
+        context,
+        title: 'Berhasil!',
+        message: message,
+        okButtonText: 'OK',
+        onOkPressed: () {
+          if (mounted) {
+            context.pop();
+          }
+        },
       );
     }
   }
@@ -134,7 +144,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
       if (success) {
         _showSuccess('Produk berhasil diperbarui');
-        if (mounted) context.pop();
       } else {
         _showError(
           productProvider.editProductError ?? 'Gagal memperbarui produk',
