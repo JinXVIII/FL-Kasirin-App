@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Kasirin Logo](assets/icon_apps/icon.png)
+![Kasirin Logo](https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/icon_apps/icon.png)
 
 **Aplikasi Kasir Modern untuk UMKM Indonesia**
 
@@ -74,56 +74,64 @@
 
 ### 📱 **Authentication & Onboarding**
 
-<a href="assets/screenshots/splash.jpeg">
-  <img alt="Splash Screen" title="Splash Screen" width="240px" height="512px" src="assets/screenshots/splash.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/splash.jpeg">
+  <img alt="Splash Screen" title="Splash Screen" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/splash.jpeg" />
 </a>
 
-<a href="assets/screenshots/login.jpeg">
-  <img alt="Login Screen" title="Login Screen" width="240px" height="512px" src="assets/screenshots/login.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/login.jpeg">
+  <img alt="Login Screen" title="Login Screen" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/login.jpeg" />
+</a>
+
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/register.jpeg">
+  <img alt="Register Screen" title="Register Screen" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/register.jpeg" />
 </a>
 
 ### 🏠 **Dashboard & Analytics**
 
-<a href="assets/screenshots/dashboard.jpeg">
-  <img alt="Dashboard" title="Dashboard" width="240px" height="512px" src="assets/screenshots/dashboard.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/dashboard.jpeg">
+  <img alt="Dashboard" title="Dashboard" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/dashboard.jpeg" />
+</a>
+
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/dashboard2.jpeg">
+  <img alt="Dashboard 2" title="Dashboard 2" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/dashboard2.jpeg" />
 </a>
 
 ### 📦 **Product Management**
 
-<a href="assets/screenshots/data_product.jpeg">
-  <img alt="Data Produk" title="Data Produk" width="240px" height="512px" src="assets/screenshots/data_product.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/data_product.jpeg">
+  <img alt="Data Produk" title="Data Produk" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/data_product.jpeg" />
 </a>
 
-<a href="assets/screenshots/add_product.jpeg">
-  <img alt="Tambah Produk" title="Tambah Produk" width="240px" height="512px" src="assets/screenshots/add_product.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/add_product.jpeg">
+  <img alt="Tambah Produk" title="Tambah Produk" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/add_product.jpeg" />
 </a>
 
-<a href="assets/screenshots/update_product.jpeg">
-  <img alt="Update Produk" title="Update Produk" width="240px" height="512px" src="assets/screenshots/update_product.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/update_product.jpeg">
+  <img alt="Update Produk" title="Update Produk" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/update_product.jpeg" />
 </a>
 
 ### 💰 **Transaction & Payment**
 
-<a href="assets/screenshots/transaction.jpeg">
-  <img alt="Transaksi" title="Transaksi" width="240px" height="512px" src="assets/screenshots/transaction.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/transaction.jpeg">
+  <img alt="Transaksi" title="Transaksi" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/transaction.jpeg" />
 </a>
 
-<a href="assets/screenshots/checkout.jpeg">
-  <img alt="Checkout" title="Checkout" width="240px" height="512px" src="assets/screenshots/checkout.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/checkout.jpeg">
+  <img alt="Checkout" title="Checkout" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/checkout.jpeg" />
 </a>
 
-<a href="assets/screenshots/payment_confirmation.jpeg">
-  <img alt="Konfirmasi Pembayaran" title="Konfirmasi Pembayaran" width="240px" height="512px" src="assets/screenshots/payment_confirmation.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/payment_confirmation.jpeg">
+  <img alt="Konfirmasi Pembayaran" title="Konfirmasi Pembayaran" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/payment_confirmation.jpeg" />
 </a>
 
 ### 📊 **Sales History**
 
-<a href="assets/screenshots/history_transaction.jpeg">
-  <img alt="Riwayat Transaksi" title="Riwayat Transaksi" width="240px" height="512px" src="assets/screenshots/history_transaction.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/history_transaction.jpeg">
+  <img alt="Riwayat Transaksi" title="Riwayat Transaksi" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/history_transaction.jpeg" />
 </a>
 
-<a href="assets/screenshots/detail_transaction.jpeg">
-  <img alt="Detail Transaksi" title="Detail Transaksi" width="240px" height="512px" src="assets/screenshots/detail_transaction.jpeg" />
+<a href="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/detail_transaction.jpeg">
+  <img alt="Detail Transaksi" title="Detail Transaksi" width="240px" height="512px" src="https://raw.githubusercontent.com/JinXVIII/FL-Kasirin-App/main/assets/screenshots/detail_transaction.jpeg" />
 </a>
 
 </div>
