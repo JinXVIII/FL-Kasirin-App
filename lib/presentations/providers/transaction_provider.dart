@@ -1,0 +1,293 @@
+import 'package:flutter/material.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../data/datasources/transaction_remote_datasource.dart';
+
+import '../../data/models/transaction_model.dart';
+import '../../data/models/request/transaction_request_model.dart';
+import '../../data/models/response/transaction_response_model.dart';
+import '../../data/models/response/sale_statistic_response_model.dart';
+import '../../data/models/response/statistic_response_model.dart';
+
+class TransactionProvider extends ChangeNotifier {
+  final TransactionRemoteDatasource _remoteDatasource;
+
+  TransactionProvider(this._remoteDatasource);
+
+  // Transaction states
+  bool _isProcessingTransaction = false;
+  String? _transactionError;
+  AddTransactionResponseModel? _lastTransaction;
+
+  // Transaction history states
+  bool _isLoadingHistory = false;
+  String? _historyError;
+  HistoryTransactionResponseModel? _transactionHistory;
+  List<TransactionModel> _allTransactions = [];
+
+  // Transaction detail states
+  bool _isLoadingDetail = false;
+  String? _detailError;
+  DetailTransactionResponseModel? _transactionDetail;
+
+  // Sales count states
+  bool _isLoadingSalesCount = false;
+  String? _salesCountError;
+  SaleStatisticResponseModel? _salesCountData;
+
+  // Information sale states
+  bool _isLoadingInformationSale = false;
+  String? _informationSaleError;
+  StatisticResponseModel? _informationSaleData;
+
+  // Getters
+  bool get isProcessingTransaction => _isProcessingTransaction;
+  String? get transactionError => _transactionError;
+  AddTransactionResponseModel? get lastTransaction => _lastTransaction;
+
+  bool get isLoadingHistory => _isLoadingHistory;
+  String? get historyError => _historyError;
+  HistoryTransactionResponseModel? get transactionHistory =>
+      _transactionHistory;
+  List<TransactionModel> get allTransactions => _allTransactions;
+
+  bool get isLoadingDetail => _isLoadingDetail;
+  String? get detailError => _detailError;
+  DetailTransactionResponseModel? get transactionDetail => _transactionDetail;
+
+  bool get isLoadingSalesCount => _isLoadingSalesCount;
+  String? get salesCountError => _salesCountError;
+  SaleStatisticResponseModel? get salesCountData => _salesCountData;
+
+  bool get isLoadingInformationSale => _isLoadingInformationSale;
+  String? get informationSaleError => _informationSaleError;
+  StatisticResponseModel? get informationSaleData => _informationSaleData;
+
+  // Create transaction method
+  Future<bool> createTransaction(
+    TransactionRequestModel transactionRequest,
+  ) async {
+    _setProcessingTransaction(true);
+    _transactionError = null;
+
+    final Either<String, AddTransactionResponseModel> result =
+        await _remoteDatasource.createTransaction(transactionRequest);
+
+    return result.fold(
+      (error) {
+        _transactionError = error;
+        _setProcessingTransaction(false);
+        return false;
+      },
+      (response) {
+        _lastTransaction = response;
+        _setProcessingTransaction(false);
+        return true;
+      },
+    );
+  }
+
+  // Get transaction history method
+  Future<bool> getTransactionHistory({
+    String? startDate,
+    String? endDate,
+    int page = 1,
+    bool refresh = false,
+  }) async {
+    _setLoadingHistory(true);
+    _historyError = null;
+
+    // If refresh, clear existing data
+    if (refresh) {
+      _allTransactions = [];
+      _transactionHistory = null;
+    }
+
+    final Either<String, HistoryTransactionResponseModel> result =
+        await _remoteDatasource.getTransactionHistory(
+          startDate: startDate,
+          endDate: endDate,
+          page: page,
+        );
+
+    return result.fold(
+      (error) {
+        _historyError = error;
+        _setLoadingHistory(false);
+        return false;
+      },
+      (response) {
+        _transactionHistory = response;
+
+        // If it's the first page or refresh, replace all transactions
+        if (page == 1 || refresh) {
+          _allTransactions = response.data.data;
+        } else {
+          // Otherwise, append to existing transactions
+          _allTransactions.addAll(response.data.data);
+        }
+
+        _setLoadingHistory(false);
+        return true;
+      },
+    );
+  }
+
+  // Get transaction detail method
+  Future<bool> getTransactionDetail(int transactionId) async {
+    _setLoadingDetail(true);
+    _detailError = null;
+
+    final Either<String, DetailTransactionResponseModel> result =
+        await _remoteDatasource.getTransactionDetail(transactionId);
+
+    return result.fold(
+      (error) {
+        _detailError = error;
+        _setLoadingDetail(false);
+        return false;
+      },
+      (response) {
+        _transactionDetail = response;
+        _setLoadingDetail(false);
+        return true;
+      },
+    );
+  }
+
+  // Get sales count method
+  Future<bool> getSalesCount() async {
+    _setLoadingSalesCount(true);
+    _salesCountError = null;
+
+    final Either<String, SaleStatisticResponseModel> result =
+        await _remoteDatasource.getSalesCount();
+
+    return result.fold(
+      (error) {
+        _salesCountError = error;
+        _setLoadingSalesCount(false);
+        return false;
+      },
+      (response) {
+        _salesCountData = response;
+        _setLoadingSalesCount(false);
+        return true;
+      },
+    );
+  }
+
+  // Get information sale method
+  Future<bool> getInformationSale() async {
+    _setLoadingInformationSale(true);
+    _informationSaleError = null;
+
+    final Either<String, StatisticResponseModel> result =
+        await _remoteDatasource.getInformationSale();
+
+    return result.fold(
+      (error) {
+        _informationSaleError = error;
+        _setLoadingInformationSale(false);
+        return false;
+      },
+      (response) {
+        _informationSaleData = response;
+        _setLoadingInformationSale(false);
+        return true;
+      },
+    );
+  }
+
+  // Load more transactions (pagination)
+  Future<bool> loadMoreTransactions({
+    String? startDate,
+    String? endDate,
+  }) async {
+    if (_transactionHistory?.data.hasMore == false || _isLoadingHistory) {
+      return false;
+    }
+
+    final nextPage = (_transactionHistory?.data.currentPage ?? 0) + 1;
+    return await getTransactionHistory(
+      startDate: startDate,
+      endDate: endDate,
+      page: nextPage,
+    );
+  }
+
+  // Set loading state for transaction
+  void _setProcessingTransaction(bool value) {
+    _isProcessingTransaction = value;
+    notifyListeners();
+  }
+
+  // Set loading state for history
+  void _setLoadingHistory(bool value) {
+    _isLoadingHistory = value;
+    notifyListeners();
+  }
+
+  // Set loading state for detail
+  void _setLoadingDetail(bool value) {
+    _isLoadingDetail = value;
+    notifyListeners();
+  }
+
+  // Set loading state for sales count
+  void _setLoadingSalesCount(bool value) {
+    _isLoadingSalesCount = value;
+    notifyListeners();
+  }
+
+  // Set loading state for information sale
+  void _setLoadingInformationSale(bool value) {
+    _isLoadingInformationSale = value;
+    notifyListeners();
+  }
+
+  // Clear error
+  void clearError() {
+    _transactionError = null;
+    _historyError = null;
+    _detailError = null;
+    _salesCountError = null;
+    _informationSaleError = null;
+    notifyListeners();
+  }
+
+  // Clear last transaction
+  void clearLastTransaction() {
+    _lastTransaction = null;
+    notifyListeners();
+  }
+
+  // Clear transaction history
+  void clearTransactionHistory() {
+    _allTransactions = [];
+    _transactionHistory = null;
+    _historyError = null;
+    notifyListeners();
+  }
+
+  // Clear transaction detail
+  void clearTransactionDetail() {
+    _transactionDetail = null;
+    _detailError = null;
+    notifyListeners();
+  }
+
+  // Clear sales count data
+  void clearSalesCountData() {
+    _salesCountData = null;
+    _salesCountError = null;
+    notifyListeners();
+  }
+
+  // Clear information sale data
+  void clearInformationSaleData() {
+    _informationSaleData = null;
+    _informationSaleError = null;
+    notifyListeners();
+  }
+}

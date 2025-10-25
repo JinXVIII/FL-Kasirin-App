@@ -1,0 +1,63 @@
+import 'dart:convert';
+
+import 'business_category_model.dart';
+
+class BusinessTypeModel {
+  final int id;
+  final int businessCategoryId;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final BusinessCategoryModel? businessCategory;
+
+  BusinessTypeModel({
+    required this.id,
+    required this.businessCategoryId,
+    required this.name,
+    this.createdAt,
+    this.updatedAt,
+    this.businessCategory,
+  });
+
+  factory BusinessTypeModel.fromJson(String str) =>
+      BusinessTypeModel.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory BusinessTypeModel.fromMap(Map<String, dynamic> json) =>
+      BusinessTypeModel(
+        id: json["id"],
+        businessCategoryId: json["business_category_id"],
+        name: json["name"],
+        createdAt: json["created_at"] != null
+            ? DateTime.parse(json["created_at"])
+            : null,
+        updatedAt: json["updated_at"] != null
+            ? DateTime.parse(json["updated_at"])
+            : null,
+        businessCategory: json["business_category"] != null
+            ? BusinessCategoryModel.fromMap(json["business_category"])
+            : null,
+      );
+
+  Map<String, dynamic> toMap() => {
+    "id": id,
+    "business_category_id": businessCategoryId,
+    "name": name,
+    "created_at": createdAt?.toIso8601String(),
+    "updated_at": updatedAt?.toIso8601String(),
+    "business_category": businessCategory?.toMap(),
+  };
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is BusinessTypeModel &&
+        other.id == id &&
+        other.businessCategoryId == businessCategoryId &&
+        other.name == name;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ businessCategoryId.hashCode ^ name.hashCode;
+}
