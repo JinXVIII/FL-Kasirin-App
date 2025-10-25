@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../cores/constants/variables.dart';
 import '../../../cores/themes/text_styles.dart';
 
 import '../../../data/models/request/product_request_model.dart';
@@ -184,7 +185,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         // Product image
                         ImagePickerWidget(
                           label: "Gambar Produk",
-                          initialImageUrl: product.thumbnail,
+                          initialImageUrl:
+                              "${Variables.baseUrlImage}/${product.thumbnail}",
                           onChanged: (XFile? value) {
                             setState(() => _selectedImage = value);
                           },
