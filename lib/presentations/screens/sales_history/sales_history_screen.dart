@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
@@ -197,6 +198,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
         SnackBar(
           content: Text(
             'Filter diterapkan: ${_startDateController.text} hingga ${_endDateController.text}',
+            style: AppTextStyles.whiteBodySmall,
           ),
           backgroundColor: Colors.green,
         ),
@@ -302,8 +304,27 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                       builder: (context, provider, child) {
                         if (provider.isLoadingHistory &&
                             provider.allTransactions.isEmpty) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 150,
+                                  height: 150,
+                                  child: Lottie.asset(
+                                    'assets/animations/loading.json',
+                                    repeat: true,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+
+                                Text(
+                                  "Memuat riwayat penjualan...",
+                                  style: AppTextStyles.caption,
+                                ),
+                              ],
+                            ),
                           );
                         }
 

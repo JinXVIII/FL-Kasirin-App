@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../../../cores/constants/variables.dart';
 import '../../../cores/themes/text_styles.dart';
 
 import '../../../data/models/request/product_request_model.dart';
@@ -13,6 +15,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/image_picker_widget.dart';
+import '../../widgets/status_dialog.dart';
 
 class EditProductScreen extends StatefulWidget {
   final int productId;
@@ -81,28 +84,37 @@ class _EditProductScreenState extends State<EditProductScreen> {
         });
       } else {
         _showError('Produk tidak ditemukan');
-        context.pop();
       }
     } else if (mounted) {
       _showError(
         productProvider.detailProductError ?? 'Gagal memuat data produk',
       );
-      context.pop();
     }
   }
 
   void _showError(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      StatusDialogs.showFailed(
+        context,
+        title: 'Error!',
+        message: message,
+        okButtonText: 'Tutup',
       );
     }
   }
 
   void _showSuccess(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.green),
+      StatusDialogs.showSuccess(
+        context,
+        title: 'Berhasil!',
+        message: message,
+        okButtonText: 'OK',
+        onOkPressed: () {
+          if (mounted) {
+            context.pop();
+          }
+        },
       );
     }
   }
@@ -133,7 +145,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
       if (success) {
         _showSuccess('Produk berhasil diperbarui');
-        if (mounted) context.pop();
       } else {
         _showError(
           productProvider.editProductError ?? 'Gagal memperbarui produk',
@@ -184,7 +195,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         // Product image
                         ImagePickerWidget(
                           label: "Gambar Produk",
-                          initialImageUrl: product.thumbnail,
+                          initialImageUrl:
+                              "${Variables.baseUrlImage}/${product.thumbnail}",
                           onChanged: (XFile? value) {
                             setState(() => _selectedImage = value);
                           },
@@ -285,13 +297,22 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 );
               },
             )
-          : const Center(
+          : Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Lottie.asset(
+                      'assets/animations/loading.json',
+                      repeat: true,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                   SizedBox(height: 16),
-                  Text("Memuat data produk..."),
+
+                  Text("Memuat data produk...", style: AppTextStyles.caption),
                 ],
               ),
             ),

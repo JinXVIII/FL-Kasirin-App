@@ -14,6 +14,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/image_picker_widget.dart';
+import '../../widgets/status_dialog.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -101,23 +102,26 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
       if (success) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Produk berhasil ditambahkan'),
-              backgroundColor: Colors.green,
-            ),
+          StatusDialogs.showSuccess(
+            context,
+            title: 'Berhasil!',
+            message: "Produk berhasil ditambahkan",
+            okButtonText: 'OK',
+            onOkPressed: () {
+              if (mounted) {
+                context.pop();
+              }
+            },
           );
-          context.pop();
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Gagal menambahkan produk: ${productProvider.addProductError}',
-              ),
-              backgroundColor: Colors.red,
-            ),
+          StatusDialogs.showFailed(
+            context,
+            title: 'Error!',
+            message:
+                "Gagal menambahkan product: ${productProvider.addProductError}",
+            okButtonText: 'Tutup',
           );
         }
       }

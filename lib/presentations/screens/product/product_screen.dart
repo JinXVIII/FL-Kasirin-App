@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../../cores/constants/colors.dart';
@@ -10,7 +11,9 @@ import '../../../data/models/product_model.dart';
 
 import '../../providers/product_provider.dart';
 
+import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/status_dialog.dart';
 import 'widgets/product_card.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -96,7 +99,28 @@ class _ProductScreenState extends State<ProductScreen> {
                 builder: (context, provider, child) {
                   // State: Loading
                   if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: Lottie.asset(
+                              'assets/animations/loading.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+
+                          Text(
+                            "Memuat seluruh produk...",
+                            style: AppTextStyles.caption,
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   // State: Error
@@ -145,28 +169,30 @@ class _ProductScreenState extends State<ProductScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey[400],
+                          // Lottie Animation
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: Lottie.asset(
+                              'assets/animations/empty.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          const SizedBox(height: 16),
                           Text(
                             provider.products.isEmpty
                                 ? 'Belum ada produk'
                                 : 'Tidak ada produk ditemukan',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
+                            style: AppTextStyles.caption,
                           ),
                           if (provider.products.isEmpty) ...[
                             const SizedBox(height: 16),
-                            ElevatedButton(
+                            CustomButton.filled(
                               onPressed: () {
                                 context.pushNamed(RouteConstants.addProduct);
                               },
-                              child: const Text('Tambah Produk'),
+                              width: 250,
+                              label: "Tambah Produk",
                             ),
                           ],
                         ],
@@ -204,9 +230,11 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   void _showDeleteConfirmation(BuildContext context, ProductModel product) {
+    final parentContext = context;
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Hapus Produk'),
           content: Text(
@@ -215,7 +243,7 @@ class _ProductScreenState extends State<ProductScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
               child: const Text('Batal'),
             ),
@@ -225,29 +253,29 @@ class _ProductScreenState extends State<ProductScreen> {
                   onPressed: provider.isDeletingProduct
                       ? null
                       : () async {
-                          Navigator.of(context).pop();
+                          Navigator.of(dialogContext).pop();
 
                           // Call delete function from provider
                           final success = await provider.deleteProduct(
                             product.id,
                           );
 
-                          if (success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Produk berhasil dihapus'),
-                                backgroundColor: Colors.green,
-                              ),
+                          if (success && parentContext.mounted) {
+                            StatusDialogs.showSuccess(
+                              parentContext,
+                              title: 'Berhasil!',
+                              message: 'Produk berhasil dihapus',
+                              onOkPressed: () {
+                                provider.getAllProducts();
+                              },
                             );
-                          } else if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
+                          } else if (!success && parentContext.mounted) {
+                            StatusDialogs.showFailed(
+                              parentContext,
+                              title: 'Gagal!',
+                              message:
                                   provider.deleteProductError ??
-                                      'Gagal menghapus produk',
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
+                                  'Gagal menghapus produk',
                             );
                           }
                         },

@@ -9,6 +9,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/transaction_provider.dart';
 
 import '../../widgets/custom_button.dart';
+import '../../widgets/status_dialog.dart';
 import 'widgets/checkout_item_card.dart';
 import 'widgets/payment_alert_dialog.dart';
 
@@ -128,21 +129,25 @@ class CheckoutScreen extends StatelessWidget {
   }
 
   void _showPaymentDialog(BuildContext context, CartProvider cartProvider) {
+    final parentContext = context;
+
     showDialog(
       context: context,
-      builder: (context) => Consumer<TransactionProvider>(
+      builder: (dialogContext) => Consumer<TransactionProvider>(
         builder: (context, transactionProvider, child) {
           return PaymentAlertDialog(
             totalPrice: cartProvider.totalPrice,
             onPaymentSuccess: () {
               cartProvider.clearCart();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pembayaran berhasil'),
-                  backgroundColor: Colors.green,
-                ),
+              StatusDialogs.showSuccess(
+                parentContext,
+                title: 'Berhasil!',
+                message: "Pembayaran berhasil",
+                okButtonText: 'OK',
+                onOkPressed: () {
+                  parentContext.pop();
+                },
               );
-              context.pop();
             },
           );
         },
