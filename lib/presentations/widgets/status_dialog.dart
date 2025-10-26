@@ -100,27 +100,29 @@ class StatusDialogs {
     Function? onOkPressed,
     String? okButtonText,
   }) {
-    if (_isDialogShowing) return;
-
     _isDialogShowing = true;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatusDialog(
-        type: DialogType.success,
-        title: title,
-        message: message,
-        onOkPressed: () {
-          _isDialogShowing = false;
-          Navigator.of(context).pop(); // Close dialog first
-          if (onOkPressed != null) {
-            onOkPressed(); // Then execute callback
-          }
-        },
-        okButtonText: okButtonText,
-      ),
-    ).then((_) => _isDialogShowing = false);
+      builder: (context) {
+        return StatusDialog(
+          type: DialogType.success,
+          title: title,
+          message: message,
+          onOkPressed: () {
+            _isDialogShowing = false;
+            Navigator.of(context).pop(); // Close dialog first
+            if (onOkPressed != null) {
+              onOkPressed(); // Then execute callback
+            }
+          },
+          okButtonText: okButtonText,
+        );
+      },
+    ).then((_) {
+      _isDialogShowing = false;
+    });
   }
 
   static void showFailed(

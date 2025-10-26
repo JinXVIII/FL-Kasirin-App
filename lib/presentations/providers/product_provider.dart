@@ -117,7 +117,6 @@ class ProductProvider extends ChangeNotifier {
       },
       (response) {
         _setAddingProduct(false);
-        getAllProducts();
         return true;
       },
     );
@@ -164,7 +163,6 @@ class ProductProvider extends ChangeNotifier {
       },
       (response) {
         _setEditingProduct(false);
-        getAllProducts();
         return true;
       },
     );
@@ -187,7 +185,6 @@ class ProductProvider extends ChangeNotifier {
       },
       (response) {
         _setDeletingProduct(false);
-        getAllProducts();
         return true;
       },
     );
