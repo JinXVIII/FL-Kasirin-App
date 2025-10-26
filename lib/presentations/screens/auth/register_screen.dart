@@ -156,21 +156,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 10),
                       // App logo
                       Center(
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.store,
-                            size: 40,
-                            color: AppColors.white,
-                          ),
+                        child: Image.asset(
+                          'assets/icon_apps/icon.png',
+                          width: 120,
+                          height: 120,
                         ),
                       ),
                       const SizedBox(height: 20),
+
                       // Welcome text
                       Text(
                         'Buat Akun Baru',
@@ -186,12 +179,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
+
                       // Name field
                       CustomTextField(
                         controller: _nameController,
                         label: 'Nama Lengkap',
                       ),
                       const SizedBox(height: 16),
+
                       // Email field
                       CustomTextField(
                         controller: _emailController,
@@ -199,6 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
+
                       // Password field
                       CustomTextField(
                         controller: _passwordController,
@@ -214,6 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
+
                       // Confirm password field
                       CustomTextField(
                         controller: _confirmPasswordController,
@@ -229,6 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
+
                       // Register button
                       CustomButton.filled(
                         onPressed: _register,

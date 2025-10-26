@@ -104,21 +104,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
                       // App logo
                       Center(
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.store,
-                            size: 40,
-                            color: AppColors.white,
-                          ),
+                        child: Image.asset(
+                          'assets/icon_apps/icon.png',
+                          width: 120,
+                          height: 120,
                         ),
                       ),
                       const SizedBox(height: 24),
+
                       // Welcome text
                       Text(
                         'Selamat Datang!',
@@ -134,6 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
+
                       // Email field
                       CustomTextField(
                         controller: _emailController,
@@ -141,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
+
                       // Password field
                       CustomTextField(
                         controller: _passwordController,
@@ -156,6 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
+
                       // Forgot password
                       Align(
                         alignment: Alignment.centerRight,
@@ -172,6 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+
                       // Login button
                       CustomButton.filled(
                         onPressed: _login,
@@ -181,6 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         disabled: authProvider.isLoading,
                       ),
                       const SizedBox(height: 20),
+
                       // Register link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
