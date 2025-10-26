@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../../cores/constants/variables.dart';
@@ -296,13 +297,22 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 );
               },
             )
-          : const Center(
+          : Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Lottie.asset(
+                      'assets/animations/loading.json',
+                      repeat: true,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                   SizedBox(height: 16),
-                  Text("Memuat data produk..."),
+
+                  Text("Memuat data produk...", style: AppTextStyles.caption),
                 ],
               ),
             ),

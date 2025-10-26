@@ -100,14 +100,25 @@ class _ProductScreenState extends State<ProductScreen> {
                   // State: Loading
                   if (provider.isLoading) {
                     return Center(
-                      child: SizedBox(
-                        width: 150,
-                        height: 150,
-                        child: Lottie.asset(
-                          'assets/animations/loading.json',
-                          repeat: true,
-                          fit: BoxFit.contain,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: Lottie.asset(
+                              'assets/animations/loading.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+
+                          Text(
+                            "Memuat seluruh produk...",
+                            style: AppTextStyles.caption,
+                          ),
+                        ],
                       ),
                     );
                   }
