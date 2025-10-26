@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/cart_provider.dart';
@@ -96,7 +97,28 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 builder: (context, productProvider, cartProvider, child) {
                   // State: Loading
                   if (productProvider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: Lottie.asset(
+                              'assets/animations/loading.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+
+                          Text(
+                            "Memuat produk...",
+                            style: AppTextStyles.caption,
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   // State: Error
@@ -145,20 +167,21 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey[400],
+                          // Lottie Animation
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: Lottie.asset(
+                              'assets/animations/empty.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          const SizedBox(height: 16),
                           Text(
                             productProvider.products.isEmpty
                                 ? 'Belum ada produk'
                                 : 'Tidak ada produk ditemukan',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
+                            style: AppTextStyles.caption,
                           ),
                         ],
                       ),
@@ -235,8 +258,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       onPressed: () {
                         if (cartProvider.cartItems.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Keranjang belanja masih kosong'),
+                            SnackBar(
+                              content: Text(
+                                'Keranjang belanja masih kosong',
+                                style: AppTextStyles.whiteBodySmall,
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
