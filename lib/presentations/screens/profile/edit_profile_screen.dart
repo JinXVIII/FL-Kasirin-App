@@ -30,10 +30,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  bool _showPasswordFields = false;
 
   @override
   void initState() {
@@ -55,12 +51,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Populate form if profile data exists
     if (mounted && provider.profileData?.data != null) {
       final profileData = provider.profileData!.data.businessProfile;
-      final userData = provider.profileData!.data;
+      // final userData = provider.profileData!.data;
 
       _businessNameController.text = profileData.storeName;
       _addressController.text = profileData.address;
       _phoneController.text = profileData.phoneNumber;
-      _nameController.text = userData.name;
+      // _nameController.text = userData.name;
 
       // Find and set the business category from the provider's list
       if (profileData.businessType.businessCategory != null) {
@@ -95,24 +91,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _nameController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _validateAndSave() {
     final provider = context.read<ProfileBusinessProvider>();
-
-    // Manual validation since CustomTextField doesn't have validator
-    if (_nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nama harus diisi'),
-          backgroundColor: AppColors.red,
-        ),
-      );
-      return;
-    }
 
     if (_businessNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,31 +145,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       );
       return;
-    }
-
-    // Validate password fields if they are shown
-    if (_showPasswordFields) {
-      if (_newPasswordController.text.isNotEmpty) {
-        if (_newPasswordController.text.length < 6) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password baru minimal 6 karakter'),
-              backgroundColor: AppColors.red,
-            ),
-          );
-          return;
-        }
-
-        if (_newPasswordController.text != _confirmPasswordController.text) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Konfirmasi password tidak cocok'),
-              backgroundColor: AppColors.red,
-            ),
-          );
-          return;
-        }
-      }
     }
 
     _saveProfile();
@@ -260,13 +218,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 20),
-
-                          // User name field
-                          CustomTextField(
-                            controller: _nameController,
-                            label: 'Nama Lengkap',
-                          ),
                           const SizedBox(height: 20),
 
                           // Business name field
@@ -439,61 +390,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             keyboardType: TextInputType.phone,
                           ),
                           const SizedBox(height: 30),
-
-                          // Password section
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Ubah Password',
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _showPasswordFields =
-                                              !_showPasswordFields;
-                                        });
-                                      },
-                                      child: Text(
-                                        _showPasswordFields ? 'Batal' : 'Ubah',
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: AppColors.orange,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (_showPasswordFields) ...[
-                                  const SizedBox(height: 16),
-                                  CustomTextField(
-                                    controller: _newPasswordController,
-                                    label: 'Password Baru (Minimal 6 karakter)',
-                                    obscureText: true,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  CustomTextField(
-                                    controller: _confirmPasswordController,
-                                    label: 'Konfirmasi Password Baru',
-                                    obscureText: true,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 40),
 
                           // Save button
                           Consumer<ProfileBusinessProvider>(
